@@ -1,5 +1,5 @@
 require('express');
-const {ObjectId, ReturnDocument} = require('mongodb');
+const {ObjectId} = require('mongodb');
 
 /*  API Endpoints:
 
