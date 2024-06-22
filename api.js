@@ -1,151 +1,251 @@
 require('express');
-require('mongodb');
+const {ObjectId} = require('mongodb');
 
-exports.setApp = function ( app, client )
+/*  API Endpoints:
+
+    Users: Register | Login
+    Resources: Add | Edit | Delete
+    Reservations: Add | Edit | Delete
+    ...
+    (Admins can modify all resources and reservations, users only modify owned)
+
+    NEEDS Json Web Token (JWT) stuff figured out
+
+*/
+
+exports.setApp = function (app, client)
 {
-    var token = require('./createJWT.js');
-    
-    app.post('/api/addcard', async (req, res, next) =>
+    // var token = require('./createJWT.js');
+
+    app.post('/api/register', async (req, res, next) =>
     {
-        // incoming: userId, color
-        // outgoing: error
+        // incoming: FirstName, LastName, Login, Password, Email
+        // outgoing: newUser || error
 
-        const { userId, card, jwtToken } = req.body;
+        const {FirstName,LastName,Login,Password,Email} = req.body;
 
         try
         {
-            if (token.isExpired(jwtToken))
+            const db = client.db('Scheduler');
+            const existingUser = await db.collection('Users').findOne({Login});
+
+            if (existingUser)
             {
-                var r = {error:'The JWT is no longer valid', jwtToken: ''};
-                res.status(200).json(r);
-                return;
+                return res.status(409).json({error:'Username already exists.'});
             }
-        }
-        catch(e)
-        {
-            console.log(e.message);
-            var r = {error:e.message, jwtToken: ''};
-            res.status(200).json(r);
-            return;
-        }
 
-        const newCard = {Card:card,UserId,userId};
-        var error = '';
+            // might want to add password hashing and email/phone verification before inserting?
 
-        try
-        {
-            const db = client.db('CardsApp');
-            const result = db.collection('Cards').insertOne(newCard);
-        }
-        catch(e)
-        {
-            error = e.toString();
-        }
+            // if email/phone verified
+            const ret = await db.collection('Users').insertOne(
+            {
+                FirstName:FirstName,
+                LastName:LastName,
+                Login:Login,
+                Password:Password,
+                Email:Email,
+                IsAdmin:false
+            });
 
-        var refreshedToken = null;
-        try
-        {
-            refreshedToken = token.refresh(jwtToken);
-        }
-        catch(e)
-        {
-            console.log(e.message);
-        }
+            // const tokenPayload = {userId:result._id};
+            // const token = jwt.sign(tokenPayload, jwtSecret, {expiresIn: '1h'});
 
-        var ret = { error: error, jwtToken: refreshedToken };
-        res.status(200).json(ret);
+            // temporary return - should just return back to login page after correct email/phone verification
+            const newUser = await db.collection('Users').findOne({_id:ret.insertedId});
+            res.status(201).json(newUser);
+        }
+        catch (e)
+        {
+            console.error('Error during user registration:', e);
+            res.status(500).json({error:'Could not connect to the databsase. Please try again later.'});
+        }
     });
 
     app.post('/api/login', async (req, res, next) =>
     {
-        // incoming: login, password
-        // outgoing: id, firstName, lastName, error
-
-        var error = '';
+        // incoming: Login, Password
+        // outgoing: user || error
         
-        const { login, password } = req.body;
+        const {Login,Password} = req.body;
 
-        const db = client.db('CardsApp');
-        const results = await db.collection('Users').find({Login:login,Password:password}).toArray();
-
-        var id = -1;
-        var fn = '';
-        var ln = '';
-
-        var ret;
-
-        if( results.length > 0 )
+        try
         {
-            id = results[0].UserId;
-            fn = results[0].FirstName;
-            ln = results[0].LastName;
+            const db = client.db('Scheduler');
+            const user = await db.collection('Users').findOne({Login});
 
-            try
+            if (user && Password === user.Password)
             {
-                const token = require("./createJWT.js");
-                ret = token.createToken( fn, ln, id );
+                // id = user[0]._id;
+                // fn = user[0].FirstName;
+                // ln = user[0].LastName;
+
+                // try
+                // {
+                //     const token = require("./createJWT.js");
+                //     user = token.createToken( fn, ln, id );
+                // }
+                // catch(e)
+                // {
+                //     user = {error:e.message};
+                // }
+
+                // send 2FA to email/phone
+                res.status(200).json(user);
             }
-            catch(e)
+            else
             {
-                ret = {error:e.message};
+                res.status(401).json({error:'Login/Password Incorrect.'});
             }
         }
-        else
+        catch (e)
         {
-            ret = {error:"Login/Password incorrect"};
+            console.error('Error during user login:', e);
+            res.status(500).json({error:'Could not connect to the databsase. Please try again later.'});
         }
-
-        res.status(200).json(ret);
     });
 
-    app.post('/api/searchcards', async (req, res, next) =>
+    app.post('/api/addresource', async (req, res, next) =>
     {
-        // incoming: userId, search
-        // outgoing: results[], error
+        // incoming: UserID, Type, Start, End
+        // outgoing: newResource || error
 
-        var error = '';
+        // const {UserID, Type, Start, End, jwtToken} = req.body;
+        const {UserID, Type, Start, End} = req.body;
 
-        const { userId, search, jwtToken } = req.body;
+        // try
+        // {
+        //     if (token.isExpired(jwtToken))
+        //     {
+        //         var r = {error:'The JWT is no longer valid', jwtToken: ''};
+        //         res.status(200).json(r);
+        //         return;
+        //     }
+        // }
+        // catch(e)
+        // {
+        //     console.log(e.message);
+        //     var r = {error:e.message, jwtToken: ''};
+        //     res.status(200).json(r);
+        //     return;
+        // }
 
         try
         {
-            if (token.isExpired(jwtToken))
+            const db = client.db('Scheduler');
+            const existingResource = await db.collection('Resources').findOne({Type});
+
+            if (existingResource)
             {
-                var r = {error:'The JWT is no longer valid', jwtToken: ''};
-                res.status(200).json(r);
-                return;
+                return res.status(409).json({error:'Resource of this name already exists.'});
             }
+
+            const ret = await db.collection('Resources').insertOne({
+                // works but idk
+                UserID:new ObjectId(UserID),
+                Type:Type,
+                Start:new Date(Start),
+                End:new Date(End)
+            });
+
+            // temporary return - probably dont need to return anything
+            const newResource = await db.collection('Resources').findOne({_id:ret.insertedId});
+            res.status(201).json(newResource);
         }
-        catch(e)
+        catch (e)
         {
-            console.log(e.message);
-            var r = {error:e.message, jwtToken: ''};
-            res.status(200).json(r);
-            return;
+            console.error('Error during resource creation:', e);
+            res.status(500).json({error:'Could not connect to the databsase. Please try again later.'});
         }
 
-        var _search = search.trim();
+        // var refreshedToken = null;
+        // try
+        // {
+        //     refreshedToken = token.refresh(jwtToken);
+        // }
+        // catch(e)
+        // {
+        //     console.log(e.message);
+        // }
+    });
 
-        const db = client.db('CardsApp');
-        const results = await db.collection('Cards').find({"Card":{$regex:_search,$options:'i'}}).toArray();
+    app.post('/api/editresource', async (req, res, next) =>
+    {
+        // incoming: UserID, ResourceID, NewType, NewStart, NewEnd
+        // outgoing: updatedResource || error
 
-        var _ret = [];
-        for( var i=0; i<results.length; i++ )
-        {
-            _ret.push( results[i].Card );
-        }
+        // const {UserID, ResourceID, jwtToken} = req.body;
+        const {UserID, ResourceID, NewType, NewStart, NewEnd} = req.body;
 
-        var refreshedToken = null;
+        // try
+        // {
+        //     if (token.isExpired(jwtToken))
+        //     {
+        //         var r = {error:'The JWT is no longer valid', jwtToken: ''};
+        //         res.status(200).json(r);
+        //         return;
+        //     }
+        // }
+        // catch(e)
+        // {
+        //     console.log(e.message);
+        //     var r = {error:e.message, jwtToken: ''};
+        //     res.status(200).json(r);
+        //     return;
+        // }
+
         try
         {
-            refreshedToken = token.refresh(jwtToken);
+            const db = client.db('Scheduler');
+            const currentUser = await db.collection('Users').findOne({_id:new ObjectId(UserID)});
+            const editResource = await db.collection('Resources').findOne({_id:new ObjectId(ResourceID)});
+            // console.log(editResource, ResourceID);
+            // console.log(currentUser, UserID);
+
+            // probably not needed, if its showing on the website it must exist?
+            if (!editResource)
+            {
+                return res.status(404).json({error:'Resource not found.'});
+            }
+
+            if (!currentUser.IsAdmin && editResource.UserID.toString() !== UserID)
+            {
+                return res.status(403).json({error:'Unauthorized access to edit this resource.'});
+            }
+
+            // allow duplicates types (names) for now
+            // const existingType = await db.collection('Resources').findOne({Type:NewType});
+            // if (existingType)
+            // {
+            //     return res.status(409).json({error:'Resource name already exists.'});
+            // }
+
+            const updatedResource = await db.collection('Resources').findOneAndUpdate(
+            {_id:new ObjectId(ResourceID)},
+            {
+                $set:
+                {
+                    Type:NewType,
+                    Start:new Date(NewStart),
+                    End:new Date(NewEnd)
+                }
+            },
+            {returnOriginal:false});
+            res.status(200).json(updatedResource);
         }
-        catch(e)
+        catch (e)
         {
-            console.log(e.message);
+            console.error('Error during resource update:', e);
+            res.status(500).json({error:'Could not connect to the databsase. Please try again later.'});
         }
 
-        var ret = {results:_ret, error: error, jwtToken: refreshedToken};
-        res.status(200).json(ret);
+        // var refreshedToken = null;
+        // try
+        // {
+        //     refreshedToken = token.refresh(jwtToken);
+        // }
+        // catch(e)
+        // {
+        //     console.log(e.message);
+        // }
     });
 }

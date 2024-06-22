@@ -1,3 +1,5 @@
+// no idea if this is required for the project, kinda annoying to deal with
+
 const jwt = require("jsonwebtoken");
 require("dotenv");
 
