@@ -17,7 +17,7 @@ const verifyAccessToken = (token) =>
 
 const refreshAccessToken = (token) =>
 {
-    const verified = jwt.verify(token,process.env.ACCESS_TOKEN_SECRET);
+    const verified = verifyAccessToken(token);
     return generateAccessToken(verified);
 }
 

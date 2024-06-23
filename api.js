@@ -1,5 +1,6 @@
 require('express');
 const bcrypt = require('bcrypt');
+// const sendOTP = require('./sendOTP');
 const {ObjectId} = require('mongodb');
 const {body,validationResult} = require('express-validator');
 const {generateAccessToken,verifyAccessToken,refreshAccessToken} = require('./JWT');
@@ -16,7 +17,8 @@ const {generateAccessToken,verifyAccessToken,refreshAccessToken} = require('./JW
 
     TODO:
 
-    Email/phone verification
+    Register: verify email or phone number and choose 2FA method (must be verified)
+    Login: 2FA
 
 */
 
@@ -90,7 +92,7 @@ exports.setApp = function(app,client)
             body('FirstName').notEmpty().withMessage('First name is required'),
             body('LastName').notEmpty().withMessage('Last name is required'),
             body('Login').notEmpty().withMessage('Login is required'),
-            body('Password').notEmpty().withMessage('Password is required').isLength(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\-]).{7,}$/).withMessage('Invalid password'),
+            body('Password').notEmpty().withMessage('Password is required').matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\-]).{7,}$/).withMessage('Invalid password'),
             body('Email').notEmpty().withMessage('Email address is required').isEmail().withMessage('Invalid email address'),
             body('Phone').notEmpty().withMessage('Phone number is required').matches(/^\d{3}-\d{3}-\d{4}$/).withMessage('Invalid phone number'),
         ],handleValidationErrors,async(req,res) =>
@@ -114,7 +116,7 @@ exports.setApp = function(app,client)
             const insertedUser = await db.collection('Users').insertOne(
             {
                 FirstName,LastName,Login,Password:hashedPassword,Email,Phone,
-                IsAdmin:false,EmailVerified:false,PhoneVerified:false
+                IsAdmin:false,EmailVerified:false,PhoneVerified:false,Method2FA:false
             });
 
             const newUser = await db.collection('Users').findOne({_id:insertedUser.insertedId});
@@ -132,31 +134,27 @@ exports.setApp = function(app,client)
             const {Login,Password} = req.body;
 
             const user = await db.collection('Users').findOne({Login});
-            if (user)
+            if (!user)
             {
-                const passwordMatch = await bcrypt.compare(Password, user.Password);
-                if (passwordMatch)
-                {
-                    if (user.EmailVerified || user.PhoneVerified)
-                    {
-                        // 2 factor authentication
+                return res.status(401).json({error:'Login/Password incorrect.'});
+            }
 
-                        const jwt = generateAccessToken(user);
-                        res.status(200).json({USER:user,TOKEN:jwt});
-                    }
-                    else
-                    {
-                        res.status(401).json({error:'Must verify email address or phone number.'});
-                    }
-                }
-                else
-                {
-                    res.status(401).json({error:'Login/Password incorrect.'});
-                }
+            const passwordMatch = await bcrypt.compare(Password, user.Password);
+            if (!passwordMatch)
+            {
+                return res.status(401).json({error:'Login/Password incorrect.'});
+            }
+
+            if (user.EmailVerified || user.PhoneVerified)
+            {
+                // 2 factor authentication goes here
+
+                const jwt = generateAccessToken(user);
+                res.status(200).json({USER:user,TOKEN:jwt});
             }
             else
             {
-                res.status(401).json({error:'Login/Password incorrect.'});
+                res.status(401).json({error:'Must verify email address or phone number.'});
             }
         });
 
