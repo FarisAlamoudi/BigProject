@@ -1,60 +1,24 @@
 const jwt = require("jsonwebtoken");
-require("dotenv");
+require("dotenv").config();
 
-function generateTokens(user)
+const generateAccessToken = (user) =>
 {
-    const accessTokenPayload = {userId: user._id};
-    const refreshTokenPayload = {userId: user._id};
-
-    const accessToken = jwt.sign(accessTokenPayload,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'});
-    const refreshToken = jwt.sign(refreshTokenPayload,process.env.REFRESH_TOKEN_SECRET,{expiresIn:'7d'});
-
-    return {accessToken,refreshToken};
+    const payload =
+    {
+        UserId:user._id,FirstName:user.FirstName,LastName:user.LastName
+    };
+    return jwt.sign(payload,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'});
 }
 
-function verifyAccessToken(token)
+const verifyAccessToken = (token) =>
 {
-    try
-    {
-        return jwt.verify(token,process.env.ACCESS_TOKEN_SECRET);
-    }
-    catch (error)
-    {
-        return null;
-    }
+    return jwt.verify(token,process.env.ACCESS_TOKEN_SECRET);
 }
 
-function verifyRefreshToken(token)
+const refreshAccessToken = (token) =>
 {
-    try
-    {
-        return jwt.verify(token,process.env.REFRESH_TOKEN_SECRET);
-    }
-    catch (error)
-    {
-        return null;
-    }
+    const verified = jwt.verify(token,process.env.ACCESS_TOKEN_SECRET);
+    return generateAccessToken(verified);
 }
 
-function refreshToken(req, res)
-{
-    const refreshToken = req.body.refreshToken;
-
-    if (!refreshToken)
-    {
-        return res.status(401).json({error:'Unauthorized: No refresh token provided'});
-    }
-
-    const decoded = verifyRefreshToken(refreshToken);
-    if (!decoded)
-    {
-        return res.status(401).json({error:'Unauthorized: Invalid refresh token'});
-    }
-
-    const accessTokenPayload = {userId:decoded.userId};
-    const accessToken = jwt.sign(accessTokenPayload,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'});
-
-    res.json({accessToken});
-}
-
-module.exports = {generateTokens,verifyAccessToken,verifyRefreshToken,refreshToken};
+module.exports = {generateAccessToken,verifyAccessToken,refreshAccessToken};
