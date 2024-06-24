@@ -5,7 +5,7 @@ const generateAccessToken = (user) =>
 {
     const payload =
     {
-        UserId:user._id,FirstName:user.FirstName,LastName:user.LastName
+        UserId:user._id,Email:user.Email,FirstName:user.FirstName,LastName:user.LastName,
     };
     return jwt.sign(payload,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'});
 }

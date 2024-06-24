@@ -1,6 +1,5 @@
 require('express');
 const bcrypt = require('bcrypt');
-// const sendOTP = require('./sendOTP');
 const {ObjectId} = require('mongodb');
 const {body,validationResult} = require('express-validator');
 const {generateAccessToken,verifyAccessToken,refreshAccessToken} = require('./JWT');
@@ -17,8 +16,8 @@ const {generateAccessToken,verifyAccessToken,refreshAccessToken} = require('./JW
 
     TODO:
 
-    Register: verify email or phone number and choose 2FA method (must be verified)
-    Login: 2FA
+    Register: send email verification
+    Login: phone 2FA
 
 */
 
@@ -94,10 +93,10 @@ exports.setApp = function(app,client)
             body('Login').notEmpty().withMessage('Login is required'),
             body('Password').notEmpty().withMessage('Password is required').matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\-]).{7,}$/).withMessage('Invalid password'),
             body('Email').notEmpty().withMessage('Email address is required').isEmail().withMessage('Invalid email address'),
-            body('Phone').notEmpty().withMessage('Phone number is required').matches(/^\d{3}-\d{3}-\d{4}$/).withMessage('Invalid phone number'),
+            body('Phone').notEmpty().withMessage('Phone number is required').matches(/^\d{3}-\d{3}-\d{4}$/).withMessage('Invalid phone number')
         ],handleValidationErrors,async(req,res) =>
         {
-            const {FirstName,LastName,Login,Password,Email,Phone} = req.body;
+            const {FirstName,LastName,Login,Password,Email,Phone,Method2FA} = req.body;
 
             const existingUser = await db.collection('Users').findOne({Login});
             if (existingUser)
@@ -105,30 +104,56 @@ exports.setApp = function(app,client)
                 return res.status(409).json({error:'Username already exists.'});
             }
 
+            // const verificationToken = generateVerificationToken();
+            const verificationToken = null;
             const hashedPassword = await bcrypt.hash(Password, 10);
-
-            // generate verificaiton code 
-
-            // save verification code to database
-
-            // send verification email/text
-
             const insertedUser = await db.collection('Users').insertOne(
             {
                 FirstName,LastName,Login,Password:hashedPassword,Email,Phone,
-                IsAdmin:false,EmailVerified:false,PhoneVerified:false,Method2FA:false
+                IsAdmin:false,EmailVerified:false,VerificationToken:verificationToken
             });
 
             const newUser = await db.collection('Users').findOne({_id:insertedUser.insertedId});
             const jwt = generateAccessToken(newUser);
+
+            // send email verification
+
             res.status(201).json({NEW_USER:newUser,TOKEN:jwt});
+        });
+
+        // incoming: VerificationToken
+        // outgoing: USER, TOKEN || error
+        app.post('/api/verifyemail',[
+            body('VerificationToken').notEmpty().withMessage('Verification token is required'),
+        ],handleValidationErrors,async(req,res) =>
+        {
+            const {VerificationToken} = req.body;
+
+            const user = await db.collection('Users').findOne({VerificationToken});
+            if (!user)
+            {
+                return res.status(404).json({error:'Verification token not found or expired.'});
+            }
+
+            if (!user.EmailVerified)
+            {
+                await db.collection('Users').updateOne({_id:user._id},{$set:{EmailVerified:true}});
+            }
+            else
+            {
+                return res.status(400).json({error:'Invalid verification request.'});
+            }
+
+            const verifiedUser = await db.collection('Users').findOne({_id:user._id});
+            const jwt = generateAccessToken(user);
+            res.status(200).json({USER:verifiedUser,TOKEN:jwt});
         });
 
         // incoming: Login, Password
         // outgoing: USER, TOKEN || error
         app.post('/api/login',[
             body('Login').notEmpty().withMessage('Login is required'),
-            body('Password').notEmpty().withMessage('Password is required'),
+            body('Password').notEmpty().withMessage('Password is required')
         ],handleValidationErrors,async(req,res) =>
         {
             const {Login,Password} = req.body;
@@ -145,16 +170,16 @@ exports.setApp = function(app,client)
                 return res.status(401).json({error:'Login/Password incorrect.'});
             }
 
-            if (user.EmailVerified || user.PhoneVerified)
+            if (user.EmailVerified)
             {
-                // 2 factor authentication goes here
+                // phone 2 factor auth goes here
 
                 const jwt = generateAccessToken(user);
                 res.status(200).json({USER:user,TOKEN:jwt});
             }
             else
             {
-                res.status(401).json({error:'Must verify email address or phone number.'});
+                res.status(401).json({error:'Must verify email address to login.'});
             }
         });
 
@@ -166,7 +191,7 @@ exports.setApp = function(app,client)
             body('Location').notEmpty().withMessage('Location is required'),
             body('Description').notEmpty().withMessage('Description is required'),
             body('Start').notEmpty().withMessage('Start date is required').isISO8601().withMessage('Invalid start date'),
-            body('End').notEmpty().withMessage('End date is required').isISO8601().withMessage('Invalid end date'),
+            body('End').notEmpty().withMessage('End date is required').isISO8601().withMessage('Invalid end date')
         ],authenticateToken,handleValidationErrors,refreshToken,async(req,res) =>
         {
             const {UserID,Type,Location,Description,Start,End} = req.body;
@@ -187,19 +212,20 @@ exports.setApp = function(app,client)
             res.status(201).json({NEW_RESOURCE:newResource});
         });
 
-        // incoming: UserID, ResourceID, Type, Location, Description, Start, End
+        // incoming: UserID, ResourceID, IsAdmin, Type, Location, Description, Start, End
         // outgoing: UPDATED_RESOURCE || error
         app.post('/api/editresource',[
             body('UserID').notEmpty().withMessage('UserID is required').isMongoId().withMessage('Invalid UserID'),
             body('ResourceID').notEmpty().withMessage('ResourceID is required').isMongoId().withMessage('Invalid ResourceID'),
+            body('IsAdmin').notEmpty().withMessage('IsAdmin is required').isBoolean().withMessage('Invalid IsAdmin'),
             body('Type').notEmpty().withMessage('Type is required'),
             body('Location').notEmpty().withMessage('Location is required'),
             body('Description').notEmpty().withMessage('Description is required'),
             body('Start').notEmpty().withMessage('Start date is required').isISO8601().withMessage('Invalid start date'),
-            body('End').notEmpty().withMessage('End date is required').isISO8601().withMessage('Invalid end date'),
+            body('End').notEmpty().withMessage('End date is required').isISO8601().withMessage('Invalid end date')
         ],authenticateToken,handleValidationErrors,refreshToken,async(req,res) =>
         {
-            const {UserID,ResourceID,Type,Location,Description,Start,End} = req.body;
+            const {UserID,ResourceID,IsAdmin,Type,Location,Description,Start,End} = req.body;
 
             const editResource = await db.collection('Resources').findOne({_id:ObjectId.createFromHexString(ResourceID)});
             if (!editResource)
@@ -207,28 +233,26 @@ exports.setApp = function(app,client)
                 return res.status(404).json({error:'Resource not found.'});
             }
             
-            const currentUser = await db.collection('Users').findOne({_id:ObjectId.createFromHexString(UserID)});
-            if (!currentUser.IsAdmin && editResource.UserID.toString() !== UserID)
+            if (!IsAdmin && editResource.UserID.toString() !== UserID)
             {
                 return res.status(403).json({error:'Unauthorized access to edit this resource.'});
             }
 
             const updatedResource = await db.collection('Resources').findOneAndUpdate(
-                {_id:ObjectId.createFromHexString(ResourceID)},
-                {$set:{Type,Location,Description,Start:new Date(Start),End:new Date(End)}},
-                {returnDocument:'after'});
+                {_id:editResource._id},{$set:{Type,Location,Description,Start:new Date(Start),End:new Date(End)}},{returnDocument:'after'});
 
             res.status(200).json({UPDATED_RESOURCE:updatedResource});
         });
 
-        // incoming: UserID, ResourceID
+        // incoming: UserID, ResourceID, IsAdmin
         // outgoing: DELETED_RESOURCE || error
         app.post('/api/deleteresource',[
             body('UserID').notEmpty().withMessage('UserID is required').isMongoId().withMessage('Invalid UserID'),
             body('ResourceID').notEmpty().withMessage('ResourceID is required').isMongoId().withMessage('Invalid ResourceID'),
+            body('IsAdmin').notEmpty().withMessage('IsAdmin is required').isBoolean().withMessage('Invalid IsAdmin')
         ],authenticateToken,handleValidationErrors,refreshToken,async(req,res) =>
         {
-            const {UserID,ResourceID} = req.body;
+            const {UserID,ResourceID,IsAdmin} = req.body;
 
             const deleteResource = await db.collection('Resources').findOne({_id:ObjectId.createFromHexString(ResourceID)});
             if (!deleteResource)
@@ -236,15 +260,12 @@ exports.setApp = function(app,client)
                 return res.status(404).json({error:'Resource not found.'});
             }
 
-            const currentUser = await db.collection('Users').findOne({_id:ObjectId.createFromHexString(UserID)});
-            if (!currentUser.IsAdmin && deleteResource.UserID.toString() !== UserID)
+            if (!IsAdmin && deleteResource.UserID.toString() !== UserID)
             {
                 return res.status(403).json({error:'Unauthorized access to delete this resource.'});
             }
 
-            const deletedResource = await db.collection('Resources').findOneAndDelete(
-                {_id:ObjectId.createFromHexString(ResourceID)},
-                {returnDocument:'before'});
+            await db.collection('Resources').findOneAndDelete({_id:deleteResource._id});
 
             res.status(200).json({DELETED_RESOURCE:deleteResource});
         });
@@ -256,7 +277,7 @@ exports.setApp = function(app,client)
             body('ResourceID').notEmpty().withMessage('ResourceID is required').isMongoId().withMessage('Invalid ResourceID'),
             body('Comment').optional(),
             body('Start').notEmpty().withMessage('Start date is required').isISO8601().withMessage('Invalid start date'),
-            body('End').notEmpty().withMessage('End date is required').isISO8601().withMessage('Invalid end date'),
+            body('End').notEmpty().withMessage('End date is required').isISO8601().withMessage('Invalid end date')
         ],authenticateToken,handleValidationErrors,refreshToken,async(req,res) =>
         {
             const {UserID,ResourceID,Comment,Start,End} = req.body;
@@ -287,17 +308,18 @@ exports.setApp = function(app,client)
             res.status(201).json({NEW_RESERVATION:newReservation});
         });
 
-        // incoming: UserID, ReservationID, Comment, Start, End
+        // incoming: UserID, ReservationID, IsAdmin, Comment, Start, End
         // outgoing: UPDATED_RESERVATION || error
         app.post('/api/editreservation',[
             body('UserID').notEmpty().withMessage('UserID is required').isMongoId().withMessage('Invalid UserID'),
             body('ReservationID').notEmpty().withMessage('ReservationID is required').isMongoId().withMessage('Invalid ReservationID'),
+            body('IsAdmin').notEmpty().withMessage('IsAdmin is required').isBoolean().withMessage('Invalid IsAdmin'),
             body('Comment').optional(),
             body('Start').notEmpty().withMessage('Start date is required').isISO8601().withMessage('Invalid start date'),
-            body('End').notEmpty().withMessage('End date is required').isISO8601().withMessage('Invalid end date'),
+            body('End').notEmpty().withMessage('End date is required').isISO8601().withMessage('Invalid end date')
         ],authenticateToken,handleValidationErrors,refreshToken,async(req,res) =>
         {
-            const {UserID,ReservationID,Comment,Start,End} = req.body;
+            const {UserID,ReservationID,IsAdmin,Comment,Start,End} = req.body;
 
             const editReservation = await db.collection('Reservations').findOne({_id:ObjectId.createFromHexString(ReservationID)});
             if (!editReservation)
@@ -307,8 +329,7 @@ exports.setApp = function(app,client)
 
             const existingReservation = await db.collection('Reservations').findOne(
             {
-                _id:{$ne:editReservation._id},
-                ResourceID:editReservation.ResourceID,
+                _id:{$ne:editReservation._id},ResourceID:editReservation.ResourceID,
                 $or:
                 [
                     {Start:{$lt:new Date(End)},End:{$gt:new Date(Start)}},
@@ -321,28 +342,26 @@ exports.setApp = function(app,client)
                 return res.status(409).json({error:'Reservation overlaps with existing reservation.'});
             }
 
-            const currentUser = await db.collection('Users').findOne({_id:ObjectId.createFromHexString(UserID)});
-            if (!currentUser.IsAdmin && editReservation.UserID.toString() !== UserID)
+            if (!IsAdmin && editReservation.UserID.toString() !== UserID)
             {
                 return res.status(403).json({error:'Unauthorized access to edit this reservation.'});
             }
 
             const updatedReservation = await db.collection('Reservations').findOneAndUpdate(
-                {_id:ObjectId.createFromHexString(ReservationID)},
-                {$set:{Comment,Start:new Date(Start),End:new Date(End)}},
-                {returnDocument:'after'});
+                {_id:editReservation._id},{$set:{Comment,Start:new Date(Start),End:new Date(End)}},{returnDocument:'after'});
 
             res.status(200).json({UPDATED_RESERVATION:updatedReservation});
         });
 
-        // incoming: UserID, ReservationID
+        // incoming: UserID, ReservationID, IsAdmin
         // outgoing: DELETED_RESERVATION || error
         app.post('/api/deletereservation',[
             body('UserID').notEmpty().withMessage('UserID is required').isMongoId().withMessage('Invalid UserID'),
             body('ReservationID').notEmpty().withMessage('ReservationID is required').isMongoId().withMessage('Invalid ReservationID'),
+            body('IsAdmin').notEmpty().withMessage('IsAdmin is required').isBoolean().withMessage('Invalid IsAdmin')
         ],authenticateToken,handleValidationErrors,refreshToken,async(req,res) =>
         {
-            const {UserID,ReservationID} = req.body;
+            const {UserID,ReservationID,IsAdmin} = req.body;
 
             const deleteReservation = await db.collection('Reservations').findOne({_id:ObjectId.createFromHexString(ReservationID)});
             if (!deleteReservation)
@@ -350,17 +369,14 @@ exports.setApp = function(app,client)
                 return res.status(404).json({error:'Reservation not found.'});
             }
 
-            const currentUser = await db.collection('Users').findOne({_id:ObjectId.createFromHexString(UserID)});
-            if (!currentUser.IsAdmin && deleteReservation.UserID.toString() !== UserID)
+            if (!IsAdmin && deleteReservation.UserID.toString() !== UserID)
             {
                 return res.status(403).json({error:'Unauthorized access to delete this reservation.'});
             }
 
-            const deletedReservation = await db.collection('Reservations').findOneAndDelete(
-                {_id:ObjectId.createFromHexString(ReservationID)},
-                {returnDocument:'before'});
+            await db.collection('Reservations').deleteOne({_id:deleteReservation._id});
 
-            res.status(200).json({DELETED_RESERVATION:deletedReservation});
+            res.status(200).json({DELETED_RESERVATION:deleteReservation});
         });
     }
     catch (e)
