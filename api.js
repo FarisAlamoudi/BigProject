@@ -1,8 +1,10 @@
 require('express');
 const bcrypt = require('bcrypt');
 const {ObjectId} = require('mongodb');
+const {sendVerificationEmail} = require('./emailService');
+const {generateToken,verifyToken} = require('./jwtUtils');
 const {body,validationResult} = require('express-validator');
-const {generateAccessToken,verifyAccessToken,refreshAccessToken} = require('./JWT');
+
 
 /*  API Endpoints:
 
@@ -16,31 +18,11 @@ const {generateAccessToken,verifyAccessToken,refreshAccessToken} = require('./JW
 
     TODO:
 
-    Register: send email verification
+    Register: send email verification (NODEMAILER)
+    Password change: send email (NODEMAILER) to link to reset page
     Login: phone 2FA
 
 */
-
-const authenticateToken = (req,res,next) =>
-{
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    if (!token) 
-    {
-        return res.status(401).json({error:'Unauthorized: Missing token.'});
-    }
-    try
-    {
-        const decoded = verifyAccessToken(token);
-        req.user = decoded;
-        next();
-    }
-    catch(e)
-    {
-        console.error('Error verifying access token:',e);
-        res.status(401).json({error:'Unauthorized: Invalid token.'});
-    }
-};
 
 const handleValidationErrors = (req,res,next) =>
 {
@@ -52,33 +34,6 @@ const handleValidationErrors = (req,res,next) =>
     next();
 };
 
-const refreshToken = async(req,res,next) =>
-{
-    try
-    {
-        await next();
-        if (res.statusCode >= 200 && res.statusCode < 300 && req.user)
-        {
-            const authHeader = req.headers['authorization'];
-            if (authHeader)
-            {
-                const token = authHeader.split(' ')[1];
-                const refreshedToken = refreshAccessToken(token);
-                if (refreshToken)
-                {
-                    return res.setHeader('authorization',`Bearer ${refreshedToken.accessToken}`);
-                }
-                console.error('Failed to refresh access token.');
-            }
-        }
-    }
-    catch(e)
-    {
-        console.error('Error in refreshToken:',e);
-        next(e);
-    }
-}
-
 exports.setApp = function(app,client)
 {
     try
@@ -86,7 +41,7 @@ exports.setApp = function(app,client)
         const db = client.db('Scheduler');
 
         // incoming: FirstName, LastName, Login, Password, Email, Phone
-        // outgoing: NEW_USER, TOKEN || error
+        // outgoing: JWT || error
         app.post('/api/register',[
             body('FirstName').notEmpty().withMessage('First name is required'),
             body('LastName').notEmpty().withMessage('Last name is required'),
@@ -96,7 +51,7 @@ exports.setApp = function(app,client)
             body('Phone').notEmpty().withMessage('Phone number is required').matches(/^\d{3}-\d{3}-\d{4}$/).withMessage('Invalid phone number')
         ],handleValidationErrors,async(req,res) =>
         {
-            const {FirstName,LastName,Login,Password,Email,Phone,Method2FA} = req.body;
+            const {FirstName,LastName,Login,Password,Email,Phone} = req.body;
 
             const existingUser = await db.collection('Users').findOne({Login});
             if (existingUser)
@@ -104,8 +59,7 @@ exports.setApp = function(app,client)
                 return res.status(409).json({error:'Username already exists.'});
             }
 
-            // const verificationToken = generateVerificationToken();
-            const verificationToken = null;
+            const verificationToken = Math.random().toString(36) + Date.now().toString(36);
             const hashedPassword = await bcrypt.hash(Password, 10);
             const insertedUser = await db.collection('Users').insertOne(
             {
@@ -114,15 +68,15 @@ exports.setApp = function(app,client)
             });
 
             const newUser = await db.collection('Users').findOne({_id:insertedUser.insertedId});
-            const jwt = generateAccessToken(newUser);
+            const JWT = generateToken(newUser);
 
-            // send email verification
+            // sendVerificationEmail(newUser.Email,newUser.VerificationToken);
 
-            res.status(201).json({NEW_USER:newUser,TOKEN:jwt});
+            res.status(201).json({JWT});
         });
 
         // incoming: VerificationToken
-        // outgoing: USER, TOKEN || error
+        // outgoing: error
         app.post('/api/verifyemail',[
             body('VerificationToken').notEmpty().withMessage('Verification token is required'),
         ],handleValidationErrors,async(req,res) =>
@@ -141,16 +95,14 @@ exports.setApp = function(app,client)
             }
             else
             {
-                return res.status(400).json({error:'Invalid verification request.'});
+                return res.status(400).json({error:'Email already verified.'});
             }
 
-            const verifiedUser = await db.collection('Users').findOne({_id:user._id});
-            const jwt = generateAccessToken(user);
-            res.status(200).json({USER:verifiedUser,TOKEN:jwt});
+            res.status(200).json({Success:'Email Verified'});
         });
 
         // incoming: Login, Password
-        // outgoing: USER, TOKEN || error
+        // outgoing: JWT || error
         app.post('/api/login',[
             body('Login').notEmpty().withMessage('Login is required'),
             body('Password').notEmpty().withMessage('Password is required')
@@ -174,8 +126,8 @@ exports.setApp = function(app,client)
             {
                 // phone 2 factor auth goes here
 
-                const jwt = generateAccessToken(user);
-                res.status(200).json({USER:user,TOKEN:jwt});
+                const JWT = generateToken(user);
+                res.status(200).json({JWT});
             }
             else
             {
@@ -183,18 +135,18 @@ exports.setApp = function(app,client)
             }
         });
 
-        // incoming: UserID, Type, Location, Description, Start, End
+        // incoming: JWT, Type, Location, Description, Start, End
         // outgoing: NEW_RESOURCE || error
         app.post('/api/addresource',[
-            body('UserID').notEmpty().withMessage('UserID is required').isMongoId().withMessage('Invalid UserID'),
             body('Type').notEmpty().withMessage('Type is required'),
             body('Location').notEmpty().withMessage('Location is required'),
             body('Description').notEmpty().withMessage('Description is required'),
             body('Start').notEmpty().withMessage('Start date is required').isISO8601().withMessage('Invalid start date'),
             body('End').notEmpty().withMessage('End date is required').isISO8601().withMessage('Invalid end date')
-        ],authenticateToken,handleValidationErrors,refreshToken,async(req,res) =>
+        ],handleValidationErrors,async(req,res) =>
         {
-            const {UserID,Type,Location,Description,Start,End} = req.body;
+            const {UserID} = verifyToken(req.headers.authorization.split(' ')[1]);
+            const {Type,Location,Description,Start,End} = req.body;
 
             const existingResource = await db.collection('Resources').findOne({Type});
             if (existingResource)
@@ -212,20 +164,19 @@ exports.setApp = function(app,client)
             res.status(201).json({NEW_RESOURCE:newResource});
         });
 
-        // incoming: UserID, ResourceID, IsAdmin, Type, Location, Description, Start, End
+        // incoming: JWT, ResourceID, Type, Location, Description, Start, End
         // outgoing: UPDATED_RESOURCE || error
         app.post('/api/editresource',[
-            body('UserID').notEmpty().withMessage('UserID is required').isMongoId().withMessage('Invalid UserID'),
             body('ResourceID').notEmpty().withMessage('ResourceID is required').isMongoId().withMessage('Invalid ResourceID'),
-            body('IsAdmin').notEmpty().withMessage('IsAdmin is required').isBoolean().withMessage('Invalid IsAdmin'),
             body('Type').notEmpty().withMessage('Type is required'),
             body('Location').notEmpty().withMessage('Location is required'),
             body('Description').notEmpty().withMessage('Description is required'),
             body('Start').notEmpty().withMessage('Start date is required').isISO8601().withMessage('Invalid start date'),
             body('End').notEmpty().withMessage('End date is required').isISO8601().withMessage('Invalid end date')
-        ],authenticateToken,handleValidationErrors,refreshToken,async(req,res) =>
+        ],handleValidationErrors,async(req,res) =>
         {
-            const {UserID,ResourceID,IsAdmin,Type,Location,Description,Start,End} = req.body;
+            const {UserID,IsAdmin} = verifyToken(req.headers.authorization.split(' ')[1]);
+            const {ResourceID,Type,Location,Description,Start,End} = req.body;
 
             const editResource = await db.collection('Resources').findOne({_id:ObjectId.createFromHexString(ResourceID)});
             if (!editResource)
@@ -244,15 +195,14 @@ exports.setApp = function(app,client)
             res.status(200).json({UPDATED_RESOURCE:updatedResource});
         });
 
-        // incoming: UserID, ResourceID, IsAdmin
+        // incoming: JWT, ResourceID
         // outgoing: DELETED_RESOURCE || error
         app.post('/api/deleteresource',[
-            body('UserID').notEmpty().withMessage('UserID is required').isMongoId().withMessage('Invalid UserID'),
-            body('ResourceID').notEmpty().withMessage('ResourceID is required').isMongoId().withMessage('Invalid ResourceID'),
-            body('IsAdmin').notEmpty().withMessage('IsAdmin is required').isBoolean().withMessage('Invalid IsAdmin')
-        ],authenticateToken,handleValidationErrors,refreshToken,async(req,res) =>
+            body('ResourceID').notEmpty().withMessage('ResourceID is required').isMongoId().withMessage('Invalid ResourceID')
+        ],handleValidationErrors,async(req,res) =>
         {
-            const {UserID,ResourceID,IsAdmin} = req.body;
+            const {UserID,IsAdmin} = verifyToken(req.headers.authorization.split(' ')[1]);
+            const {ResourceID} = req.body;
 
             const deleteResource = await db.collection('Resources').findOne({_id:ObjectId.createFromHexString(ResourceID)});
             if (!deleteResource)
@@ -270,17 +220,17 @@ exports.setApp = function(app,client)
             res.status(200).json({DELETED_RESOURCE:deleteResource});
         });
 
-        // incoming: UserID, ResourceID, Comment, Start, End
+        // incoming: JWT, ResourceID, Comment, Start, End
         // outgoing: NEW_RESERVATION || error
         app.post('/api/addreservation',[
-            body('UserID').notEmpty().withMessage('UserID is required').isMongoId().withMessage('Invalid UserID'),
             body('ResourceID').notEmpty().withMessage('ResourceID is required').isMongoId().withMessage('Invalid ResourceID'),
             body('Comment').optional(),
             body('Start').notEmpty().withMessage('Start date is required').isISO8601().withMessage('Invalid start date'),
             body('End').notEmpty().withMessage('End date is required').isISO8601().withMessage('Invalid end date')
-        ],authenticateToken,handleValidationErrors,refreshToken,async(req,res) =>
+        ],handleValidationErrors,async(req,res) =>
         {
-            const {UserID,ResourceID,Comment,Start,End} = req.body;
+            const {UserID} = verifyToken(req.headers.authorization.split(' ')[1]);
+            const {ResourceID,Comment,Start,End} = req.body;
 
             const existingReservation = await db.collection('Reservations').findOne(
             {
@@ -308,18 +258,17 @@ exports.setApp = function(app,client)
             res.status(201).json({NEW_RESERVATION:newReservation});
         });
 
-        // incoming: UserID, ReservationID, IsAdmin, Comment, Start, End
+        // incoming: JWT, ReservationID, Comment, Start, End
         // outgoing: UPDATED_RESERVATION || error
         app.post('/api/editreservation',[
-            body('UserID').notEmpty().withMessage('UserID is required').isMongoId().withMessage('Invalid UserID'),
             body('ReservationID').notEmpty().withMessage('ReservationID is required').isMongoId().withMessage('Invalid ReservationID'),
-            body('IsAdmin').notEmpty().withMessage('IsAdmin is required').isBoolean().withMessage('Invalid IsAdmin'),
             body('Comment').optional(),
             body('Start').notEmpty().withMessage('Start date is required').isISO8601().withMessage('Invalid start date'),
             body('End').notEmpty().withMessage('End date is required').isISO8601().withMessage('Invalid end date')
-        ],authenticateToken,handleValidationErrors,refreshToken,async(req,res) =>
+        ],handleValidationErrors,async(req,res) =>
         {
-            const {UserID,ReservationID,IsAdmin,Comment,Start,End} = req.body;
+            const {UserID,IsAdmin} = verifyToken(req.headers.authorization.split(' ')[1]);
+            const {ReservationID,Comment,Start,End} = req.body;
 
             const editReservation = await db.collection('Reservations').findOne({_id:ObjectId.createFromHexString(ReservationID)});
             if (!editReservation)
@@ -353,15 +302,14 @@ exports.setApp = function(app,client)
             res.status(200).json({UPDATED_RESERVATION:updatedReservation});
         });
 
-        // incoming: UserID, ReservationID, IsAdmin
+        // incoming: JWT, ReservationID
         // outgoing: DELETED_RESERVATION || error
         app.post('/api/deletereservation',[
-            body('UserID').notEmpty().withMessage('UserID is required').isMongoId().withMessage('Invalid UserID'),
             body('ReservationID').notEmpty().withMessage('ReservationID is required').isMongoId().withMessage('Invalid ReservationID'),
-            body('IsAdmin').notEmpty().withMessage('IsAdmin is required').isBoolean().withMessage('Invalid IsAdmin')
-        ],authenticateToken,handleValidationErrors,refreshToken,async(req,res) =>
+        ],handleValidationErrors,async(req,res) =>
         {
-            const {UserID,ReservationID,IsAdmin} = req.body;
+            const {UserID,IsAdmin} = verifyToken(req.headers.authorization.split(' ')[1]);
+            const {ReservationID} = req.body;
 
             const deleteReservation = await db.collection('Reservations').findOne({_id:ObjectId.createFromHexString(ReservationID)});
             if (!deleteReservation)

@@ -1,4 +1,4 @@
-const app_name = 'cards-app-cop4331-5308547791f0'
+const app_name = 'scheduleteam-76ddd4fbc335'
 exports.buildPath =
 function buildPath(route)
 {
