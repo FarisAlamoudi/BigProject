@@ -1,5 +1,4 @@
 import React,{useState} from 'react';
-import {jwtDecode} from "jwt-decode";
 
 function Register()
 {
@@ -31,6 +30,7 @@ function Register()
         document.getElementById('passwordError').innerText = '';
         document.getElementById('emailError').innerText = '';
         document.getElementById('phoneError').innerText = '';
+        document.getElementById('registerResult').innerText = '';
 
         try
         {
@@ -41,20 +41,7 @@ function Register()
 
             if (response.status === 201)
             {
-                const {JWT} = res;
-                const decoded = jwtDecode(JWT);
-
-                try
-                {
-                    localStorage.setItem('user_data', JSON.stringify(decoded));
-                    setMessage('');
-                    window.location.href = '/';
-                }
-                catch (e)
-                {
-                    console.log(e.toString());
-                    return;
-                }
+                setMessage(res.success);
             }
             else if (response.status === 400)
             {
@@ -155,7 +142,7 @@ function Register()
                 value="Register"
                 onClick={doRegister}
             />
-            <span id="loginResult">{message}</span>
+            <span id="registerResult">{message}</span>
             <span id="text">OR</span>
             <input
                 type="submit"

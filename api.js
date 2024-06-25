@@ -41,7 +41,7 @@ exports.setApp = function(app,client)
         const db = client.db('Scheduler');
 
         // incoming: FirstName, LastName, Login, Password, Email, Phone
-        // outgoing: JWT || error
+        // outgoing: success || error
         app.post('/api/register',[
             body('FirstName').notEmpty().withMessage('First name is required'),
             body('LastName').notEmpty().withMessage('Last name is required'),
@@ -68,15 +68,14 @@ exports.setApp = function(app,client)
             });
 
             const newUser = await db.collection('Users').findOne({_id:insertedUser.insertedId});
-            const JWT = generateToken(newUser);
 
             // sendVerificationEmail(newUser.Email,newUser.VerificationToken);
 
-            res.status(201).json({JWT});
+            return res.status(201).json({success:'User registered, verify email address.'});
         });
 
         // incoming: VerificationToken
-        // outgoing: error
+        // outgoing: success || error
         app.post('/api/verifyemail',[
             body('VerificationToken').notEmpty().withMessage('Verification token is required'),
         ],handleValidationErrors,async(req,res) =>
@@ -98,7 +97,7 @@ exports.setApp = function(app,client)
                 return res.status(400).json({error:'Email already verified.'});
             }
 
-            res.status(200).json({Success:'Email Verified'});
+            return res.status(200).json({Success:'Email Verified'});
         });
 
         //app,post('/api/edituser')
@@ -131,11 +130,11 @@ exports.setApp = function(app,client)
                 // phone 2 factor auth
 
                 const JWT = generateToken(user);
-                res.status(200).json({JWT});
+                return res.status(200).json({JWT});
             }
             else
             {
-                res.status(401).json({error:'Must verify email address to login.'});
+                return res.status(401).json({error:'Must verify email address to login.'});
             }
         });
 
@@ -167,11 +166,11 @@ exports.setApp = function(app,client)
                 });
 
                 const newResource = await db.collection('Resources').findOne({_id:insertedResource.insertedId});
-                res.status(201).json({NEW_RESOURCE:newResource});
+                return res.status(201).json({NEW_RESOURCE:newResource});
             }
             catch(e)
             {
-                res.status(401).json({error:e.message});
+                return res.status(401).json({error:e.message});
             }
         });
 
@@ -205,11 +204,11 @@ exports.setApp = function(app,client)
                 const updatedResource = await db.collection('Resources').findOneAndUpdate(
                     {_id:editResource._id},{$set:{Type,Location,Description,Start:new Date(Start),End:new Date(End)}},{returnDocument:'after'});
 
-                res.status(200).json({UPDATED_RESOURCE:updatedResource});
+                return res.status(200).json({UPDATED_RESOURCE:updatedResource});
             }
             catch(e)
             {
-                res.status(401).json({error:e.message});
+                return res.status(401).json({error:e.message});
             }
         });
 
@@ -237,11 +236,11 @@ exports.setApp = function(app,client)
 
                 await db.collection('Resources').findOneAndDelete({_id:deleteResource._id});
 
-                res.status(200).json({DELETED_RESOURCE:deleteResource});
+                return res.status(200).json({DELETED_RESOURCE:deleteResource});
             }
             catch(e)
             {
-                res.status(401).json({error:e.message});
+                return res.status(401).json({error:e.message});
             }
         });
 
@@ -282,11 +281,11 @@ exports.setApp = function(app,client)
                 });
 
                 const newReservation = await db.collection('Reservations').findOne({_id:insertedReservation.insertedId});
-                res.status(201).json({NEW_RESERVATION:newReservation});
+                return res.status(201).json({NEW_RESERVATION:newReservation});
             }
             catch(e)
             {
-                res.status(401).json({error:e.message});
+                return res.status(401).json({error:e.message});
             }
         });
 
@@ -333,11 +332,11 @@ exports.setApp = function(app,client)
                 const updatedReservation = await db.collection('Reservations').findOneAndUpdate(
                     {_id:editReservation._id},{$set:{Comment,Start:new Date(Start),End:new Date(End)}},{returnDocument:'after'});
 
-                res.status(200).json({UPDATED_RESERVATION:updatedReservation});
+                    return res.status(200).json({UPDATED_RESERVATION:updatedReservation});
             }
             catch(e)
             {
-                res.status(401).json({error:e.message});
+                return res.status(401).json({error:e.message});
             }
         });
 
@@ -365,11 +364,11 @@ exports.setApp = function(app,client)
 
                 await db.collection('Reservations').deleteOne({_id:deleteReservation._id});
 
-                res.status(200).json({DELETED_RESERVATION:deleteReservation});
+                return res.status(200).json({DELETED_RESERVATION:deleteReservation});
             }
             catch(e)
             {
-                res.status(401).json({error:e.message});
+                return res.status(401).json({error:e.message});
             }
         });
     }

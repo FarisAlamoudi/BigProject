@@ -1,6 +1,6 @@
 const app_name = 'scheduleteam-76ddd4fbc335'
-exports.buildPath =
-function buildPath(route)
+
+exports.buildPath = function buildPath(route)
 {
     if (process.env.NODE_ENV === 'production')
     {
