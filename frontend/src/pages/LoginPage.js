@@ -7,8 +7,8 @@ const LoginPage = () =>
 {
     return(
         <div>
-            <PageTitle />
-            <Login />
+            <PageTitle/>
+            <Login/>
         </div>
     );
 };

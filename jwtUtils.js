@@ -11,8 +11,9 @@ function generateToken(user)
     return jwt.sign(payload,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'});
 }
 
-function verifyToken(token)
+function authenticateToken(req)
 {
+    const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
     return jwt.verify(token,process.env.ACCESS_TOKEN_SECRET);
 }
 
@@ -27,4 +28,4 @@ function refreshToken(token)
     return jwt.sign(payload,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'});
 }
 
-module.exports = {generateToken,verifyToken,refreshToken};
+module.exports = {generateToken,authenticateToken,refreshToken};

@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { jwtDecode } from "jwt-decode";
+import React,{useState} from 'react';
+import {jwtDecode} from "jwt-decode";
 
 function Login()
 {
-    var bp = require('./Path.js');
+    const bp = require('./Path.js');
 
-    var loginName;
-    var loginPassword;
+    let Login;
+    let Password;
 
     const [message,setMessage] = useState('');
 
@@ -14,63 +14,98 @@ function Login()
     {
         event.preventDefault();
 
-        var obj = {login:loginName.value,password:loginPassword.value};
-        var js = JSON.stringify(obj);
+        const js = JSON.stringify({Login:Login.value,Password:Password.value});
+
+        document.getElementById('loginError').innerText = '';
+        document.getElementById('passwordError').innerText = '';
+        document.getElementById('loginResult').innerText = '';
 
         try
         {
             const response = await fetch(bp.buildPath('api/login'),
             {method:'POST',body:js,headers:{'Content-Type':'application/json'}});
 
-            var res = JSON.parse(await response.text());
-            const { accessToken } = res;
-            const decoded = jwtDecode(accessToken,{complete:true});
+            const res = await response.json();
+            console.log(res);
 
-            try
+            if (response.status === 200)
             {
-                var ud = decoded;
-                var userId = ud.userId;
-                var firstName = ud.firstName;
-                var lastName = ud.lastName;
+                const {JWT} = res;
+                const decoded = jwtDecode(JWT);
 
-                if ( userId <= 0 )
+                try
                 {
-                    setMessage('User/Password combination incorrect');
-                }
-                else
-                {
-                    var user ={firstName:firstName,lastName:lastName,id:userId}
-                    localStorage.setItem('user_data', JSON.stringify(user));
-
+                    localStorage.setItem('user_data', JSON.stringify(decoded));
                     setMessage('');
                     window.location.href = '/cards';
                 }
+                catch (e)
+                {
+                    console.log(e.toString());
+                    return;
+                }
             }
-            catch(e)
+            else if (response.status === 400)
             {
-                console.log( e.toString() );
-                return;
+                res.errors.forEach(error =>
+                {
+                    if (error.path === 'Login')
+                    {
+                        document.getElementById('loginError').innerText = error.msg;
+                    }
+                    else if (error.path === 'Password')
+                    {
+                        document.getElementById('passwordError').innerText = error.msg;
+                    }
+                });
+            }
+            else
+            {
+                setMessage(res.error);
             }
         }
-        catch(e)
+        catch (e)
         {
-            console.log( e.toString() );
+            console.log(e.toString());
             return;
         }
     };
 
     return(
         <div id="loginDiv">
-            <span id="inner-title">PLEASE LOG IN</span><br />
-            <input type="text" id="loginName" placeholder="Username"
-                ref={(c) => loginName = c} />
-            <input type="password" id="loginPassword" placeholder="Password"
-                ref={(c) => loginPassword = c} />
-            <input type="submit" id="loginButton" class="buttons" value = "Do It"
-                onClick={doLogin} />
+            <span id="inner-title">PLEASE LOG IN</span><br/>
+            <input
+                type="text"
+                id="Login"
+                placeholder="Username"
+                ref={(c) => (Login = c)}
+            />
+            <span className="error" id="loginError"></span>
+            <input
+                type="password"
+                id="Password"
+                placeholder="Password"
+                ref={(c) => (Password = c)}
+            />
+            <span className="error" id="passwordError"></span>
+            <input
+                type="submit"
+                id="loginButton"
+                className="buttons"
+                value="Login"
+                onClick={doLogin}
+            />
             <span id="loginResult">{message}</span>
+            <span id="text">OR</span>
+            <input
+                type="submit"
+                id="registerButton"
+                className="buttons"
+                value="Register"
+                onClick={doLogin}
+            />
         </div>
     );
-};
+}
 
 export default Login;

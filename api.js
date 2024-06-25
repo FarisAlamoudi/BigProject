@@ -2,9 +2,8 @@ require('express');
 const bcrypt = require('bcrypt');
 const {ObjectId} = require('mongodb');
 const {sendVerificationEmail} = require('./emailService');
-const {generateToken,verifyToken} = require('./jwtUtils');
 const {body,validationResult} = require('express-validator');
-
+const {generateToken,authenticateToken} = require('./jwtUtils');
 
 /*  API Endpoints:
 
@@ -19,6 +18,7 @@ const {body,validationResult} = require('express-validator');
     TODO:
 
     Register: send email verification (NODEMAILER)
+    Edit user:
     Password change: send email (NODEMAILER) to link to reset page
     Login: phone 2FA
 
@@ -101,6 +101,10 @@ exports.setApp = function(app,client)
             res.status(200).json({Success:'Email Verified'});
         });
 
+        //app,post('/api/edituser')
+
+        //app,post('/api/changepassword')
+
         // incoming: Login, Password
         // outgoing: JWT || error
         app.post('/api/login',[
@@ -124,7 +128,7 @@ exports.setApp = function(app,client)
 
             if (user.EmailVerified)
             {
-                // phone 2 factor auth goes here
+                // phone 2 factor auth
 
                 const JWT = generateToken(user);
                 res.status(200).json({JWT});
@@ -145,23 +149,30 @@ exports.setApp = function(app,client)
             body('End').notEmpty().withMessage('End date is required').isISO8601().withMessage('Invalid end date')
         ],handleValidationErrors,async(req,res) =>
         {
-            const {UserID} = verifyToken(req.headers.authorization.split(' ')[1]);
-            const {Type,Location,Description,Start,End} = req.body;
-
-            const existingResource = await db.collection('Resources').findOne({Type});
-            if (existingResource)
+            try
             {
-                return res.status(409).json({error:'Resource of this name already exists.'});
+                const {UserID} = authenticateToken(req);
+                const {Type,Location,Description,Start,End} = req.body;
+
+                const existingResource = await db.collection('Resources').findOne({Type});
+                if (existingResource)
+                {
+                    return res.status(409).json({error:'Resource of this name already exists.'});
+                }
+
+                const insertedResource = await db.collection('Resources').insertOne(
+                {
+                    UserID:ObjectId.createFromHexString(UserID),Type,Location,
+                    Description,Start:new Date(Start),End:new Date(End)
+                });
+
+                const newResource = await db.collection('Resources').findOne({_id:insertedResource.insertedId});
+                res.status(201).json({NEW_RESOURCE:newResource});
             }
-
-            const insertedResource = await db.collection('Resources').insertOne(
+            catch(e)
             {
-                UserID:ObjectId.createFromHexString(UserID),Type,Location,
-                Description,Start:new Date(Start),End:new Date(End)
-            });
-
-            const newResource = await db.collection('Resources').findOne({_id:insertedResource.insertedId});
-            res.status(201).json({NEW_RESOURCE:newResource});
+                res.status(401).json({error:e.message});
+            }
         });
 
         // incoming: JWT, ResourceID, Type, Location, Description, Start, End
@@ -175,24 +186,31 @@ exports.setApp = function(app,client)
             body('End').notEmpty().withMessage('End date is required').isISO8601().withMessage('Invalid end date')
         ],handleValidationErrors,async(req,res) =>
         {
-            const {UserID,IsAdmin} = verifyToken(req.headers.authorization.split(' ')[1]);
-            const {ResourceID,Type,Location,Description,Start,End} = req.body;
-
-            const editResource = await db.collection('Resources').findOne({_id:ObjectId.createFromHexString(ResourceID)});
-            if (!editResource)
+            try
             {
-                return res.status(404).json({error:'Resource not found.'});
+                const {UserID,IsAdmin} = authenticateToken(req);
+                const {ResourceID,Type,Location,Description,Start,End} = req.body;
+
+                const editResource = await db.collection('Resources').findOne({_id:ObjectId.createFromHexString(ResourceID)});
+                if (!editResource)
+                {
+                    return res.status(404).json({error:'Resource not found.'});
+                }
+                
+                if (!IsAdmin && editResource.UserID.toString() !== UserID)
+                {
+                    return res.status(403).json({error:'Unauthorized access to edit this resource.'});
+                }
+
+                const updatedResource = await db.collection('Resources').findOneAndUpdate(
+                    {_id:editResource._id},{$set:{Type,Location,Description,Start:new Date(Start),End:new Date(End)}},{returnDocument:'after'});
+
+                res.status(200).json({UPDATED_RESOURCE:updatedResource});
             }
-            
-            if (!IsAdmin && editResource.UserID.toString() !== UserID)
+            catch(e)
             {
-                return res.status(403).json({error:'Unauthorized access to edit this resource.'});
+                res.status(401).json({error:e.message});
             }
-
-            const updatedResource = await db.collection('Resources').findOneAndUpdate(
-                {_id:editResource._id},{$set:{Type,Location,Description,Start:new Date(Start),End:new Date(End)}},{returnDocument:'after'});
-
-            res.status(200).json({UPDATED_RESOURCE:updatedResource});
         });
 
         // incoming: JWT, ResourceID
@@ -201,23 +219,30 @@ exports.setApp = function(app,client)
             body('ResourceID').notEmpty().withMessage('ResourceID is required').isMongoId().withMessage('Invalid ResourceID')
         ],handleValidationErrors,async(req,res) =>
         {
-            const {UserID,IsAdmin} = verifyToken(req.headers.authorization.split(' ')[1]);
-            const {ResourceID} = req.body;
-
-            const deleteResource = await db.collection('Resources').findOne({_id:ObjectId.createFromHexString(ResourceID)});
-            if (!deleteResource)
+            try
             {
-                return res.status(404).json({error:'Resource not found.'});
-            }
+                const {UserID,IsAdmin} = authenticateToken(req);
+                const {ResourceID} = req.body;
 
-            if (!IsAdmin && deleteResource.UserID.toString() !== UserID)
+                const deleteResource = await db.collection('Resources').findOne({_id:ObjectId.createFromHexString(ResourceID)});
+                if (!deleteResource)
+                {
+                    return res.status(404).json({error:'Resource not found.'});
+                }
+
+                if (!IsAdmin && deleteResource.UserID.toString() !== UserID)
+                {
+                    return res.status(403).json({error:'Unauthorized access to delete this resource.'});
+                }
+
+                await db.collection('Resources').findOneAndDelete({_id:deleteResource._id});
+
+                res.status(200).json({DELETED_RESOURCE:deleteResource});
+            }
+            catch(e)
             {
-                return res.status(403).json({error:'Unauthorized access to delete this resource.'});
+                res.status(401).json({error:e.message});
             }
-
-            await db.collection('Resources').findOneAndDelete({_id:deleteResource._id});
-
-            res.status(200).json({DELETED_RESOURCE:deleteResource});
         });
 
         // incoming: JWT, ResourceID, Comment, Start, End
@@ -229,33 +254,40 @@ exports.setApp = function(app,client)
             body('End').notEmpty().withMessage('End date is required').isISO8601().withMessage('Invalid end date')
         ],handleValidationErrors,async(req,res) =>
         {
-            const {UserID} = verifyToken(req.headers.authorization.split(' ')[1]);
-            const {ResourceID,Comment,Start,End} = req.body;
+            try
+            {
+                const {UserID} = authenticateToken(req);
+                const {ResourceID,Comment,Start,End} = req.body;
 
-            const existingReservation = await db.collection('Reservations').findOne(
-            {
-                ResourceID:ObjectId.createFromHexString(ResourceID),
-                $or:
-                [
-                    {Start:{$lt:new Date(End)},End:{$gt:new Date(Start)}},
-                    {Start:{$gte:new Date(Start),$lte:new Date(End)}},
-                    {End:{$gte:new Date(Start),$lte:new Date(End)}}
-                ]
-            });
-            if (existingReservation)
-            {
-                return res.status(409).json({error:'Reservation overlaps with existing reservation.'});
+                const existingReservation = await db.collection('Reservations').findOne(
+                {
+                    ResourceID:ObjectId.createFromHexString(ResourceID),
+                    $or:
+                    [
+                        {Start:{$lt:new Date(End)},End:{$gt:new Date(Start)}},
+                        {Start:{$gte:new Date(Start),$lte:new Date(End)}},
+                        {End:{$gte:new Date(Start),$lte:new Date(End)}}
+                    ]
+                });
+                if (existingReservation)
+                {
+                    return res.status(409).json({error:'Reservation overlaps with existing reservation.'});
+                }
+
+                const insertedReservation = await db.collection('Reservations').insertOne(
+                {
+                    UserID:ObjectId.createFromHexString(UserID),
+                    ResourceID:ObjectId.createFromHexString(ResourceID),
+                    Comment,Start:new Date(Start),End:new Date(End)
+                });
+
+                const newReservation = await db.collection('Reservations').findOne({_id:insertedReservation.insertedId});
+                res.status(201).json({NEW_RESERVATION:newReservation});
             }
-
-            const insertedReservation = await db.collection('Reservations').insertOne(
+            catch(e)
             {
-                UserID:ObjectId.createFromHexString(UserID),
-                ResourceID:ObjectId.createFromHexString(ResourceID),
-                Comment,Start:new Date(Start),End:new Date(End)
-            });
-
-            const newReservation = await db.collection('Reservations').findOne({_id:insertedReservation.insertedId});
-            res.status(201).json({NEW_RESERVATION:newReservation});
+                res.status(401).json({error:e.message});
+            }
         });
 
         // incoming: JWT, ReservationID, Comment, Start, End
@@ -267,39 +299,46 @@ exports.setApp = function(app,client)
             body('End').notEmpty().withMessage('End date is required').isISO8601().withMessage('Invalid end date')
         ],handleValidationErrors,async(req,res) =>
         {
-            const {UserID,IsAdmin} = verifyToken(req.headers.authorization.split(' ')[1]);
-            const {ReservationID,Comment,Start,End} = req.body;
-
-            const editReservation = await db.collection('Reservations').findOne({_id:ObjectId.createFromHexString(ReservationID)});
-            if (!editReservation)
+            try
             {
-                return res.status(404).json({error:'Reservation not found.'});
+                const {UserID,IsAdmin} = authenticateToken(req);
+                const {ReservationID,Comment,Start,End} = req.body;
+
+                const editReservation = await db.collection('Reservations').findOne({_id:ObjectId.createFromHexString(ReservationID)});
+                if (!editReservation)
+                {
+                    return res.status(404).json({error:'Reservation not found.'});
+                }
+
+                const existingReservation = await db.collection('Reservations').findOne(
+                {
+                    _id:{$ne:editReservation._id},ResourceID:editReservation.ResourceID,
+                    $or:
+                    [
+                        {Start:{$lt:new Date(End)},End:{$gt:new Date(Start)}},
+                        {Start:{$gte:new Date(Start),$lte:new Date(End)}},
+                        {End:{$gte:new Date(Start),$lte:new Date(End)}}
+                    ]
+                });
+                if (existingReservation)
+                {
+                    return res.status(409).json({error:'Reservation overlaps with existing reservation.'});
+                }
+
+                if (!IsAdmin && editReservation.UserID.toString() !== UserID)
+                {
+                    return res.status(403).json({error:'Unauthorized access to edit this reservation.'});
+                }
+
+                const updatedReservation = await db.collection('Reservations').findOneAndUpdate(
+                    {_id:editReservation._id},{$set:{Comment,Start:new Date(Start),End:new Date(End)}},{returnDocument:'after'});
+
+                res.status(200).json({UPDATED_RESERVATION:updatedReservation});
             }
-
-            const existingReservation = await db.collection('Reservations').findOne(
+            catch(e)
             {
-                _id:{$ne:editReservation._id},ResourceID:editReservation.ResourceID,
-                $or:
-                [
-                    {Start:{$lt:new Date(End)},End:{$gt:new Date(Start)}},
-                    {Start:{$gte:new Date(Start),$lte:new Date(End)}},
-                    {End:{$gte:new Date(Start),$lte:new Date(End)}}
-                ]
-            });
-            if (existingReservation)
-            {
-                return res.status(409).json({error:'Reservation overlaps with existing reservation.'});
+                res.status(401).json({error:e.message});
             }
-
-            if (!IsAdmin && editReservation.UserID.toString() !== UserID)
-            {
-                return res.status(403).json({error:'Unauthorized access to edit this reservation.'});
-            }
-
-            const updatedReservation = await db.collection('Reservations').findOneAndUpdate(
-                {_id:editReservation._id},{$set:{Comment,Start:new Date(Start),End:new Date(End)}},{returnDocument:'after'});
-
-            res.status(200).json({UPDATED_RESERVATION:updatedReservation});
         });
 
         // incoming: JWT, ReservationID
@@ -308,23 +347,30 @@ exports.setApp = function(app,client)
             body('ReservationID').notEmpty().withMessage('ReservationID is required').isMongoId().withMessage('Invalid ReservationID'),
         ],handleValidationErrors,async(req,res) =>
         {
-            const {UserID,IsAdmin} = verifyToken(req.headers.authorization.split(' ')[1]);
-            const {ReservationID} = req.body;
-
-            const deleteReservation = await db.collection('Reservations').findOne({_id:ObjectId.createFromHexString(ReservationID)});
-            if (!deleteReservation)
+            try
             {
-                return res.status(404).json({error:'Reservation not found.'});
-            }
+                const {UserID,IsAdmin} = authenticateToken(req);
+                const {ReservationID} = req.body;
 
-            if (!IsAdmin && deleteReservation.UserID.toString() !== UserID)
+                const deleteReservation = await db.collection('Reservations').findOne({_id:ObjectId.createFromHexString(ReservationID)});
+                if (!deleteReservation)
+                {
+                    return res.status(404).json({error:'Reservation not found.'});
+                }
+
+                if (!IsAdmin && deleteReservation.UserID.toString() !== UserID)
+                {
+                    return res.status(403).json({error:'Unauthorized access to delete this reservation.'});
+                }
+
+                await db.collection('Reservations').deleteOne({_id:deleteReservation._id});
+
+                res.status(200).json({DELETED_RESERVATION:deleteReservation});
+            }
+            catch(e)
             {
-                return res.status(403).json({error:'Unauthorized access to delete this reservation.'});
+                res.status(401).json({error:e.message});
             }
-
-            await db.collection('Reservations').deleteOne({_id:deleteReservation._id});
-
-            res.status(200).json({DELETED_RESERVATION:deleteReservation});
         });
     }
     catch (e)
