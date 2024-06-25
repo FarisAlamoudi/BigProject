@@ -26,7 +26,6 @@ function Login()
             {method:'POST',body:js,headers:{'Content-Type':'application/json'}});
 
             const res = await response.json();
-            console.log(res);
 
             if (response.status === 200)
             {
@@ -37,7 +36,7 @@ function Login()
                 {
                     localStorage.setItem('user_data', JSON.stringify(decoded));
                     setMessage('');
-                    window.location.href = '/cards';
+                    window.location.href = '/reserve';
                 }
                 catch (e)
                 {
@@ -71,9 +70,14 @@ function Login()
         }
     };
 
+    const redirectToRegister = () =>
+    {
+        window.location.href = '/register';
+    }
+
     return(
         <div id="loginDiv">
-            <span id="inner-title">PLEASE LOG IN</span><br/>
+            <span id="inner-title">LOG IN</span><br/>
             <input
                 type="text"
                 id="Login"
@@ -102,7 +106,7 @@ function Login()
                 id="registerButton"
                 className="buttons"
                 value="Register"
-                onClick={doLogin}
+                onClick={redirectToRegister}
             />
         </div>
     );
