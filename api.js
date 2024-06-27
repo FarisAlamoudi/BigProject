@@ -10,16 +10,14 @@ const {generateToken,authenticateToken} = require('./jwtUtils');
     FUNCTIONAL:
 
     Users: Register | Login
-    Resources: Add | Edit | Delete
-    Reservations: Add | Edit | Delete
+    Resources: Add | Edit | Delete | Show
+    Reservations: Add | Edit | Delete | Show
 
     --------------------------------------
 
     TODO:
 
-    Resources: Show
-    Reservations: Show
-    Edit user
+    Edit user / settings (dark mode, etc)?
     Login: phone 2FA
 
 */
@@ -74,7 +72,7 @@ exports.setApp = function(app,client)
             });
 
             const newUser = await db.collection('Users').findOne({_id:insertedUser.insertedId});
-            // sendVerification(newUser.Email,newUser.VerificationToken);
+            sendVerification(newUser.Email,newUser.VerificationToken);
             return res.status(201).json({success:'User registered, verify email address to login.'});
         });
 
@@ -120,7 +118,7 @@ exports.setApp = function(app,client)
             }
 
             const resetToken = Math.random().toString(36).substring(2,8);
-            // sendReset(user.Email,resetToken);
+            sendReset(user.Email,resetToken);
             return res.status(200).json({RESET_TOKEN:resetToken});
         });
 
@@ -264,21 +262,36 @@ exports.setApp = function(app,client)
             }
         });
 
-        // incomin: Search
+        // incoming: Search
         // outgoing: RESOURCES || error
         app.post('/api/showresources',async(req,res) =>
         {
             const {Query} = req.body;
             let filter = {};
-
+        
             if (Query)
             {
                 const fields = ['Type','Location','Description','Start','End'];
-                filter = {$or:fields.map(field => ({[field]:{regex:new RegExp(Query,'i')}}))}
-            };
-            resources = await db.collection('Resources').find(filter).toArray();
-
-            return res.status(200).json(resources);
+                filter = {$or:fields.map(field => ({[field]:{$regex:new RegExp(Query,'i')}}))};
+            }
+        
+            try
+            {
+                let resources;
+                if (Object.keys(filter).length === 0)
+                {
+                    resources = await db.collection('Resources').find().toArray();
+                }
+                else
+                {
+                    resources = await db.collection('Resources').find(filter).toArray();
+                }
+                return res.status(200).json({RESOURCES:resources});
+            }
+            catch(e)
+            {
+                return res.status(500).json({error:e.message});
+            }
         });
 
         // incoming: JWT, ResourceID, Comment, Start, End
@@ -406,6 +419,38 @@ exports.setApp = function(app,client)
             catch(e)
             {
                 return res.status(401).json({error:e.message});
+            }
+        });
+
+        // incoming: Search
+        // outgoing: RESERVATIONS || error
+        app.post('/api/showreservations',async(req,res) =>
+        {
+            const {Query} = req.body;
+            let filter = {};
+        
+            if (Query)
+            {
+                const fields = ['Comment','Start','End'];
+                filter = {$or:fields.map(field => ({[field]:{$regex:new RegExp(Query,'i')}}))};
+            }
+        
+            try
+            {
+                let reservations;
+                if (Object.keys(filter).length === 0)
+                {
+                    reservations = await db.collection('Reservations').find().toArray();
+                }
+                else
+                {
+                    reservations = await db.collection('Reservations').find(filter).toArray();
+                }
+                return res.status(200).json({RESERVATIONS:reservations});
+            }
+            catch(e)
+            {
+                return res.status(500).json({error:e.message});
             }
         });
     }
