@@ -32,6 +32,8 @@ function Register()
         document.getElementById('phoneError').innerText = '';
         document.getElementById('registerResult').innerText = '';
 
+        // confirm email is correct with popup before proceeding
+
         try
         {
             const response = await fetch(bp.buildPath('api/register'),

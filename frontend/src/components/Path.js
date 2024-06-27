@@ -1,10 +1,10 @@
-const app_name = 'scheduleteam-76ddd4fbc335'
+const app_name = '4331booking'
 
 exports.buildPath = function buildPath(route)
 {
     if (process.env.NODE_ENV === 'production')
     {
-        return 'https://' + app_name + '.herokuapp.com/' + route;
+        return 'https://www.' + app_name + '.com/' + route;
     }
     else
     {
