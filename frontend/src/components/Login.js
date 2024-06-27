@@ -7,6 +7,7 @@ function Login()
 
     let Login;
     let Password;
+    let UserResetToken;
 
     const [message,setMessage] = useState('');
 
@@ -36,7 +37,7 @@ function Login()
                 {
                     localStorage.setItem('user_data', JSON.stringify(decoded));
                     setMessage('');
-                    window.location.href = '/reserve';
+                    window.location.href = '/resources';
                 }
                 catch (e)
                 {
@@ -64,6 +65,48 @@ function Login()
             }
         }
         catch (e)
+        {
+            console.log(e.toString());
+            return;
+        }
+    };
+
+    const doReset = async event =>
+    {
+        event.preventDefault();
+
+        const js = JSON.stringify({UserResetToken:UserResetToken.value});
+
+        document.getElementById('resetError').innerText = '';
+
+        try
+        {
+            const response = await fetch(bp.buildPath('api/sendresettoken'),
+            {method:'POST',body:js,headers:{'Content-Type':'application/json'}});
+
+            const res = await response.json();
+
+            if (response.status === 200)
+            {
+                const {RealResetToken} = res;
+
+                if (UserResetToken === RealResetToken)
+                {
+                    // ask for password, twice to confirm, then button to click reset
+
+                    // api call to update password
+                }
+                else
+                {
+                    // incorrect or expired input token
+                }
+            }
+            else
+            {
+                setMessage(res.error);
+            }
+        }
+        catch(e)
         {
             console.log(e.toString());
             return;
@@ -100,7 +143,6 @@ function Login()
                 onClick={doLogin}
             />
             <span id="loginResult">{message}</span>
-            <span id="text">OR</span>
             <input
                 type="submit"
                 id="registerButton"
@@ -108,6 +150,15 @@ function Login()
                 value="Register"
                 onClick={redirectToRegister}
             />
+            <span id="text">Forgot your password?</span>
+            <input
+                type="submit"
+                id="registerButton"
+                className="buttons"
+                value="Click here to reset"
+                onClick={doReset}
+            />
+            <span id="resetError">{message}</span>
         </div>
     );
 }

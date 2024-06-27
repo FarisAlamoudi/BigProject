@@ -1,8 +1,8 @@
 require('express');
 const bcrypt = require('bcrypt');
 const {ObjectId} = require('mongodb');
-const {sendVerificationEmail} = require('./emailService');
 const {body,validationResult} = require('express-validator');
+const {sendVerification,sendReset} = require('./emailService');
 const {generateToken,authenticateToken} = require('./jwtUtils');
 
 /*  API Endpoints:
@@ -10,16 +10,14 @@ const {generateToken,authenticateToken} = require('./jwtUtils');
     FUNCTIONAL:
 
     Users: Register | Login
-    Resources: Add | Edit | Delete
-    Reservations: Add | Edit | Delete
+    Resources: Add | Edit | Delete | Show
+    Reservations: Add | Edit | Delete | Show
 
     --------------------------------------
 
     TODO:
 
-    Register: send email verification (NODEMAILER)
-    Edit user:
-    Password change: send email (NODEMAILER) to link to reset page
+    Edit user / settings (dark mode, etc)?
     Login: phone 2FA
 
 */
@@ -53,10 +51,16 @@ exports.setApp = function(app,client)
         {
             const {FirstName,LastName,Login,Password,Email,Phone} = req.body;
 
-            const existingUser = await db.collection('Users').findOne({Login});
-            if (existingUser)
+            const existingLogin = await db.collection('Users').findOne({Login});
+            if (existingLogin)
             {
-                return res.status(409).json({error:'Username already exists.'});
+                return res.status(409).json({error:'User name already connected to a ___.com account. Reset your password here.'});
+            }
+
+            const existingEmail = await db.collection('Users').findOne({Email});
+            if (existingEmail)
+            {
+                return res.status(409).json({error:'Email already connected to a ___.com account. Reset your password here.'});
             }
 
             const verificationToken = Math.random().toString(36) + Date.now().toString(36);
@@ -68,10 +72,8 @@ exports.setApp = function(app,client)
             });
 
             const newUser = await db.collection('Users').findOne({_id:insertedUser.insertedId});
-
-            // sendVerificationEmail(newUser.Email,newUser.VerificationToken);
-
-            return res.status(201).json({success:'User registered, verify email address.'});
+            sendVerification(newUser.Email,newUser.VerificationToken);
+            return res.status(201).json({success:'User registered, verify email address to login.'});
         });
 
         // incoming: VerificationToken
@@ -96,13 +98,29 @@ exports.setApp = function(app,client)
             {
                 return res.status(400).json({error:'Email already verified.'});
             }
-
-            return res.status(200).json({Success:'Email Verified'});
+            return res.status(200).json({success:'Email Verified'});
         });
 
         //app,post('/api/edituser')
 
-        //app,post('/api/changepassword')
+        // incoming: Email
+        // outgoing: RESET_TOKEN || error
+        app.post('/api/sendresettoken',[
+            body('Email').notEmpty().withMessage('Email is required'),
+        ],handleValidationErrors,async(req,res) =>
+        {
+            const {Email} = req.body;
+
+            const user = await db.collection('Users').findOne({Email});
+            if (!user)
+            {
+                return res.status(401).json({error:'Email does not belong to a ___.com account.'});
+            }
+
+            const resetToken = Math.random().toString(36).substring(2,8);
+            sendReset(user.Email,resetToken);
+            return res.status(200).json({RESET_TOKEN:resetToken});
+        });
 
         // incoming: Login, Password
         // outgoing: JWT || error
@@ -244,6 +262,38 @@ exports.setApp = function(app,client)
             }
         });
 
+        // incoming: Search
+        // outgoing: RESOURCES || error
+        app.post('/api/showresources',async(req,res) =>
+        {
+            const {Query} = req.body;
+            let filter = {};
+        
+            if (Query)
+            {
+                const fields = ['Type','Location','Description','Start','End'];
+                filter = {$or:fields.map(field => ({[field]:{$regex:new RegExp(Query,'i')}}))};
+            }
+        
+            try
+            {
+                let resources;
+                if (Object.keys(filter).length === 0)
+                {
+                    resources = await db.collection('Resources').find().toArray();
+                }
+                else
+                {
+                    resources = await db.collection('Resources').find(filter).toArray();
+                }
+                return res.status(200).json({RESOURCES:resources});
+            }
+            catch(e)
+            {
+                return res.status(500).json({error:e.message});
+            }
+        });
+
         // incoming: JWT, ResourceID, Comment, Start, End
         // outgoing: NEW_RESERVATION || error
         app.post('/api/addreservation',[
@@ -369,6 +419,38 @@ exports.setApp = function(app,client)
             catch(e)
             {
                 return res.status(401).json({error:e.message});
+            }
+        });
+
+        // incoming: Search
+        // outgoing: RESERVATIONS || error
+        app.post('/api/showreservations',async(req,res) =>
+        {
+            const {Query} = req.body;
+            let filter = {};
+        
+            if (Query)
+            {
+                const fields = ['Comment','Start','End'];
+                filter = {$or:fields.map(field => ({[field]:{$regex:new RegExp(Query,'i')}}))};
+            }
+        
+            try
+            {
+                let reservations;
+                if (Object.keys(filter).length === 0)
+                {
+                    reservations = await db.collection('Reservations').find().toArray();
+                }
+                else
+                {
+                    reservations = await db.collection('Reservations').find(filter).toArray();
+                }
+                return res.status(200).json({RESERVATIONS:reservations});
+            }
+            catch(e)
+            {
+                return res.status(500).json({error:e.message});
             }
         });
     }
