@@ -120,50 +120,55 @@ function Login()
 
     return(
         <div id="loginDiv">
-            <span id="inner-title">LOG IN</span><br/>
-            <span id="text">Don't have an account? </span>
-            <input
-                type="submit"
-                id="registerButton"
-                className="buttons"
-                value="Create one"
-                onClick={redirectToRegister}
-            />
-            <br/>
-            <input
-                type="text"
-                id="Login"
-                placeholder="Username"
-                ref={(c) => (Login = c)}
-            />
-            <span className="error" id="loginError"></span>
-            <br/>
-            <input
-                type="password"
-                id="Password"
-                placeholder="Password"
-                ref={(c) => (Password = c)}
-            />
-            <span className="error" id="passwordError"></span>
-            <br/>
-            <span id="text">Forgot your password?</span>
-            <input
-                type="submit"
-                id="registerButton"
-                className="buttons"
-                value="Click here to reset"
-                onClick={doReset}
-            />
-            <span id="resetError">{message}</span>
-            <br/>
-            <input
-                type="submit"
-                id="loginButton"
-                className="buttons"
-                value="Login"
-                onClick={doLogin}
-            />
-            <span id="loginResult">{message}</span>
+            <div className="loginForm">
+                <span id="inner-title">LOG IN</span><br/>
+                <span id="text">Don't have an account? </span>
+                <input
+                    type="submit"
+                    id="registerButton"
+                    className="buttons"
+                    value="Create one"
+                    onClick={redirectToRegister}
+                />
+                <br/>
+                <input
+                    type="text"
+                    id="Login"
+                    placeholder="Username"
+                    ref={(c) => (Login = c)}
+                />
+                <span className="error" id="loginError"></span>
+                <br/>
+                <input
+                    type="password"
+                    id="Password"
+                    placeholder="Password"
+                    ref={(c) => (Password = c)}
+                />
+                <span className="error" id="passwordError"></span>
+                <br/>
+                <span id="text">Forgot your password?</span>
+                <input
+                    type="submit"
+                    id="registerButton"
+                    className="buttons"
+                    value="Click here to reset"
+                    onClick={doReset}
+                />
+                <span id="resetError">{message}</span>
+                <br/>
+                <input
+                    type="submit"
+                    id="loginButton"
+                    className="buttons"
+                    value="Login"
+                    onClick={doLogin}
+                />
+                <span id="loginResult">{message}</span>
+            </div>
+            <div className="loginImage">
+                <img src="temp.jpg"/>
+            </div>
         </div>
     );
 }
