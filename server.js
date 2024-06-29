@@ -127,7 +127,7 @@ app.post('/api/updatepassword', async(req, res) =>
 app.post('/api/login', async(req, res) =>
 {
     const user = await User.findOne({UserName: req.body.UserName})
-    if (!user || !bcrypt.compare(req.body.Password, user.Password))
+    if (!user || !(await bcrypt.compare(req.body.Password, user.Password)))
         return res.status(401).send({error: 'Login/Password incorrect.'})
     if (user.EmailVerified)
     {
