@@ -129,6 +129,7 @@ function Login()
                 value="Create one"
                 onClick={redirectToRegister}
             />
+            <br/>
             <input
                 type="text"
                 id="Login"
@@ -154,6 +155,7 @@ function Login()
                 onClick={doReset}
             />
             <span id="resetError">{message}</span>
+            <br/>
             <input
                 type="submit"
                 id="loginButton"
