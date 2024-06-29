@@ -94,7 +94,7 @@ function Register()
 
     return(
         <div id="registerDiv">
-            <span id="inner-title">REGISTER A NEW USER</span><br/>
+            <span id="inner-title">Register a New User</span><br/>
             <input
                 type="text"
                 id="FirstName"
@@ -102,6 +102,7 @@ function Register()
                 ref={(c) => (FirstName = c)}
             />
             <span className="error" id="firstError"></span>
+            <br/>
             <input
                 type="text"
                 id="LastName"
@@ -109,6 +110,7 @@ function Register()
                 ref={(c) => (LastName = c)}
             />
             <span className="error" id="lastError"></span>
+            <br/>
             <input
                 type="text"
                 id="Login"
@@ -116,6 +118,7 @@ function Register()
                 ref={(c) => (Login = c)}
             />
             <span className="error" id="loginError"></span>
+            <br/>
             <input
                 type="password"
                 id="Password"
@@ -123,6 +126,7 @@ function Register()
                 ref={(c) => (Password = c)}
             />
             <span className="error" id="passwordError"></span>
+            <br/>
             <input
                 type="text"
                 id="Email"
@@ -130,6 +134,7 @@ function Register()
                 ref={(c) => (Email = c)}
             />
             <span className="error" id="emailError"></span>
+            <br/>
             <input
                 type="password"
                 id="Phone"
@@ -137,6 +142,7 @@ function Register()
                 ref={(c) => (Phone = c)}
             />
             <span className="error" id="phoneError"></span>
+            <br/>
             <input
                 type="submit"
                 id="registerButton"
