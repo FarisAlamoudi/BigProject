@@ -120,8 +120,11 @@ function Login()
 
     return(
         <div id="loginDiv">
+            <div className="loginImage">
+                <img src="temp.jpg"/>
+            </div>
             <div className="loginForm">
-                <span id="inner-title">LOG IN</span><br/>
+                <span id="inner-title">Login</span><br/>
                 <span id="text">Don't have an account? </span>
                 <input
                     type="submit"
@@ -147,7 +150,7 @@ function Login()
                 />
                 <span className="error" id="passwordError"></span>
                 <br/>
-                <span id="text">Forgot your password?</span>
+                <span id="text">Forgot your password? </span>
                 <input
                     type="submit"
                     id="registerButton"
@@ -165,9 +168,6 @@ function Login()
                     onClick={doLogin}
                 />
                 <span id="loginResult">{message}</span>
-            </div>
-            <div className="loginImage">
-                <img src="temp.jpg"/>
             </div>
         </div>
     );
