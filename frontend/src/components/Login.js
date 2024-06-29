@@ -121,6 +121,14 @@ function Login()
     return(
         <div id="loginDiv">
             <span id="inner-title">LOG IN</span><br/>
+            <span id="text">Don't have an account? </span>
+            <input
+                type="submit"
+                id="registerButton"
+                className="buttons"
+                value="Create one"
+                onClick={redirectToRegister}
+            />
             <input
                 type="text"
                 id="Login"
@@ -136,21 +144,7 @@ function Login()
                 ref={(c) => (Password = c)}
             />
             <span className="error" id="passwordError"></span>
-            <input
-                type="submit"
-                id="loginButton"
-                className="buttons"
-                value="Login"
-                onClick={doLogin}
-            />
-            <span id="loginResult">{message}</span>
-            <input
-                type="submit"
-                id="registerButton"
-                className="buttons"
-                value="Register"
-                onClick={redirectToRegister}
-            />
+            <br/>
             <span id="text">Forgot your password?</span>
             <input
                 type="submit"
@@ -160,6 +154,14 @@ function Login()
                 onClick={doReset}
             />
             <span id="resetError">{message}</span>
+            <input
+                type="submit"
+                id="loginButton"
+                className="buttons"
+                value="Login"
+                onClick={doLogin}
+            />
+            <span id="loginResult">{message}</span>
         </div>
     );
 }
