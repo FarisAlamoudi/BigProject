@@ -13,6 +13,37 @@
   }
 }
 
+/*--------------------------*/
+
+.loginDiv {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100vh;
+    padding: 20px;
+}
+
+.loginForm {
+    width: 50%;
+    padding: 20px;
+}
+
+.loginImage {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.loginImage img {
+    max-width: 100%;
+    height: auto;
+}
+
+/*-----------------------*/
+
+
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
