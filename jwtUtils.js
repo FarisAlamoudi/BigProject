@@ -6,9 +6,11 @@ function generateToken(user)
     const payload =
     {
         UserID:user._id,FirstName:user.FirstName,LastName:user.LastName,Login:user.Login,
-        Email:user.Email,IsAdmin:user.IsAdmin,EmailVerified:user.EmailVerified
+        Email:user.Email,Phone:user.Phone,IsAdmin:user.IsAdmin,EmailVerified:user.EmailVerified,
+        DarkMode:user.DarkMode,PublicInfo:user.PublicInfo
     };
-    return jwt.sign(payload,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'});
+    const accessToken = jwt.sign(payload,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'15m'});
+    const refreshToken = jwt.sign(payload,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'});
 }
 
 function authenticateToken(req)
