@@ -153,7 +153,7 @@ function Login()
                 <span id="text">Forgot your password? </span>
                 <input
                     type="submit"
-                    id="registerButton"
+                    id="resetButton"
                     className="buttons"
                     value="Click here to reset"
                     onClick={doReset}
