@@ -1,7 +1,7 @@
 require("dotenv").config();
 const sendGrid = require('@sendgrid/mail');
 sendGrid.setApiKey(process.env.SENDGRID_API_KEY);
-const bp = require('./frontend/src/components/Path.js');
+const bp = require('./frontend/src/pages/Path.js');
 
 async function send(Email,msg)
 {
