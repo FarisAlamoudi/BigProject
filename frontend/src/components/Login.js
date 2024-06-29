@@ -128,6 +128,7 @@ function Login()
                 ref={(c) => (Login = c)}
             />
             <span className="error" id="loginError"></span>
+            <br/>
             <input
                 type="password"
                 id="Password"
