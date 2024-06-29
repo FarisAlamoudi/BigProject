@@ -121,7 +121,7 @@ function Login()
     return(
         <div id="loginDiv">
             <div className="loginImage">
-                <img src="temp.jpg"/>
+                <img src="/loginImage.jpeg"/>
             </div>
             <div className="loginForm">
                 <span id="inner-title">Login</span><br/>
