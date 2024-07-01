@@ -13,7 +13,7 @@ function PageTitle()
     }
     
     return(
-        <h1 id="title">ReserveSmart</h1>
+        <h1 id="title">ReserveSmar</h1>
         <input
             type="submit"
             id="registerButton"
