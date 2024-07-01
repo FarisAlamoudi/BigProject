@@ -94,7 +94,7 @@ function Register()
 
     return(
         <div id="registerDiv">
-            <span id="inner-title">Register a New User</span><br/>
+            <span id="inner-title">Register a new user</span><br/>
             <input
                 type="text"
                 id="FirstName"
