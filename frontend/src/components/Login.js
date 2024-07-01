@@ -125,7 +125,7 @@ function Login()
             </div>
             <div className="loginForm">
                 <span id="inner-title">Login</span><br/>
-                <span id="text">Dont have an account? </span>
+                <span id="text">Don't have an account? </span>
                 <input
                     type="submit"
                     id="registerButton"
