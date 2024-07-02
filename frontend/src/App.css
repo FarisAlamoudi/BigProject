@@ -40,12 +40,14 @@
 /*----------*/
 
 #loginDiv {
+  margin: 20px;
   display: flex;
   align-items: center;
 }
 
 .loginImage {
   flex: 1;
+  margin: 20px;
 }
 
 .loginForm {
