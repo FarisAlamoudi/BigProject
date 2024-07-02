@@ -40,9 +40,10 @@
 /*----------*/
 
 #loginDiv {
-  margin: 80px;
-  padding: 80px;
+  margin: 100px;
+  padding: 50px;
   background-color: #dcdbe0;
+  radius: 25%;
   display: flex;
   align-items: center;
 }
@@ -65,5 +66,5 @@
   flex-direction: column;
   align-items: center; /* Center horizontally */
   justify-content: center; /* Center vertically */
-  text-align: center; /* Center text */
+  /*text-align: center;*/
 }
