@@ -11,8 +11,6 @@
 
 .loginDiv {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
     height: 100vh;
     padding: 20px;
 }
@@ -24,9 +22,6 @@
 
 .loginImage {
     width: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 .loginImage img {
