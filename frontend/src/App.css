@@ -41,13 +41,17 @@
 
 #loginDiv {
   margin: 80px;
-  color: #dcdbe0;
+  padding: 80px;
+  background-color: #dcdbe0;
   display: flex;
   align-items: center;
 }
 
 .loginImage {
   flex: 1;
+  display: flex;
+  align-items: center; /* Center vertically */
+  justify-content: center; /* Center horizontally */
 }
 
 .loginImage img {
