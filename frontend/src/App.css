@@ -41,9 +41,9 @@
 
 #loginDiv {
   margin: 100px;
-  padding: 50px;
+  padding: 100px, 50px, 100px, 50px;
   background-color: #dcdbe0;
-  radius: 25%;
+  border-radius: 5%;
   display: flex;
   align-items: center;
 }
@@ -56,7 +56,7 @@
 }
 
 .loginImage img {
-  max-width: 50%;
+  max-width: 100%;
   height: auto;
 }
 
