@@ -16,11 +16,16 @@
 }
 
 .loginForm {
+    height: 200px;
+    width: 200px;
     /*width: 50%;
     padding: 20px;*/
 }
 
 .loginImage {
+    height: 200px;
+    width: 200px;
+    margin-right: 20px;
     /*width: 50%;*/
 }
 
