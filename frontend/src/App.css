@@ -7,41 +7,13 @@
   pointer-events: none;
 }
 
-/*--------------------------*/
-
-.loginDiv {
-    display: flex;
-    /*height: 100vh;
-    padding: 20px;*/
-}
-
-.loginForm {
-    height: 200px;
-    width: 200px;
-    /*width: 50%;
-    padding: 20px;*/
-}
-
-.loginImage {
-    height: 200px;
-    width: 200px;
-    /*width: 50%;*/
-}
-
-.loginImage img {
-    /*max-width: 50%;
-    height: auto;*/
-}
-
-/*-----------------------*/
-
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
   }
 }
 
-/*.App-header {
+.App-header {
   background-color: #282c34;
   min-height: 100vh;
   display: flex;
@@ -50,7 +22,7 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
-}*/
+}
 
 .App-link {
   color: #61dafb;
@@ -63,4 +35,19 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/*----------*/
+
+#loginDiv {
+  display: flex;
+  align-items: center;
+}
+
+.loginImage {
+  flex: 1;
+}
+
+.loginForm {
+  flex: 1;
 }
