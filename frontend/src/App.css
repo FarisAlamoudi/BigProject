@@ -11,22 +11,22 @@
 
 .loginDiv {
     display: flex;
-    height: 100vh;
-    padding: 20px;
+    /*height: 100vh;
+    padding: 20px;*/
 }
 
 .loginForm {
-    width: 50%;
-    padding: 20px;
+    /*width: 50%;
+    padding: 20px;*/
 }
 
 .loginImage {
-    width: 50%;
+    /*width: 50%;*/
 }
 
 .loginImage img {
-    max-width: 50%;
-    height: auto;
+    /*max-width: 50%;
+    height: auto;*/
 }
 
 /*-----------------------*/
