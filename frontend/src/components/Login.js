@@ -142,7 +142,6 @@ function Login()
                     ref={(c) => (Login = c)}
                 />
                 <span className="error" id="loginError"></span>
-                <br/>
                 <input
                     type="password"
                     id="Password"
@@ -150,7 +149,6 @@ function Login()
                     ref={(c) => (Password = c)}
                 />
                 <span className="error" id="passwordError"></span>
-                <br/>
                 <div>
                     <span id="text">Forgot your password? </span>
                     <input
@@ -162,7 +160,6 @@ function Login()
                     />
                     <span id="resetError">{message}</span>
                             </div>
-                <br/>
                 <input
                     type="submit"
                     id="loginButton"
