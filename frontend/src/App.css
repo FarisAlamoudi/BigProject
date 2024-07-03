@@ -67,4 +67,5 @@
   align-items: center; /* Center horizontally */
   justify-content: center; /* Center vertically */
   text-align: center;
+  margin: 10px 0;
 }
