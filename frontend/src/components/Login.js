@@ -125,15 +125,16 @@ function Login()
             </div>
             <div className="loginForm">
                 <span id="inner-title">Login</span><br/>
-                <span id="text">Don't have an account? </span>
-                <input
-                    type="submit"
-                    id="registerButton"
-                    className="buttons"
-                    value="Create one"
-                    onClick={redirectToRegister}
-                />
-                <br/>
+                <div>
+                    <span id="text">Don't have an account? </span>
+                    <input
+                        type="submit"
+                        id="registerButton"
+                        className="buttons"
+                        value="Create one"
+                        onClick={redirectToRegister}
+                    />
+                </div>
                 <input
                     type="text"
                     id="Login"
@@ -150,15 +151,17 @@ function Login()
                 />
                 <span className="error" id="passwordError"></span>
                 <br/>
-                <span id="text">Forgot your password? </span>
-                <input
-                    type="submit"
-                    id="resetButton"
-                    className="buttons"
-                    value="Click here to reset"
-                    onClick={doReset}
-                />
-                <span id="resetError">{message}</span>
+                <div>
+                    <span id="text">Forgot your password? </span>
+                    <input
+                        type="submit"
+                        id="resetButton"
+                        className="buttons"
+                        value="Click here to reset"
+                        onClick={doReset}
+                    />
+                    <span id="resetError">{message}</span>
+                            </div>
                 <br/>
                 <input
                     type="submit"
