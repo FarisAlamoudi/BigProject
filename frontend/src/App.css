@@ -46,6 +46,7 @@
   border-radius: 30px;
   display: flex;
   align-items: center;
+  height: 400px;
 }
 
 .loginImage {
@@ -67,5 +68,4 @@
   align-items: center; /* Center horizontally */
   justify-content: center; /* Center vertically */
   text-align: center;
-  height: 100%;
 }
