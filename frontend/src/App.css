@@ -68,3 +68,8 @@
   justify-content: center; /* Center vertically */
   text-align: center;
 }
+
+.loginForm input,
+.loginForm span {
+  margin: 5px; /* Add margin for spacing */
+}
