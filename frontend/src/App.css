@@ -41,12 +41,11 @@
 
 #loginDiv {
   margin: 100px;
-  padding: 100px, 50px, 100px, 50px;
+  padding: 100px;
   background-color: #dcdbe0;
   border-radius: 30px;
   display: flex;
   align-items: center;
-  height: 400px;
 }
 
 .loginImage {
