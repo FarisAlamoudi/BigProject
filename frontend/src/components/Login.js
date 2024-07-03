@@ -124,7 +124,7 @@ function Login()
                 <img src="/loginImage.jpeg"/>
             </div>
             <div className="loginForm">
-                <span id="inner-title">Login</span><br/>
+                <span id="inner-title">Login</span>
                 <div>
                     <span id="text">Don't have an account? </span>
                     <input
