@@ -1,13 +1,15 @@
-const express = require('express')
-const app = express()
-const cors = require('cors')
-const mongoose = require('mongoose')
-const User = require('./models/user.model')
-const Resource = require('./models/resource.model')
-const Reservation = require('./models/reservation.model')
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
-const {sendVerification, sendReset} = require('./emailService')
+const express = require('express');
+const app = express();
+const cors = require('cors');
+const mongoose = require('mongoose');
+const User = require('./models/user.model');
+const Resource = require('./models/resource.model');
+const Reservation = require('./models/reservation.model');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const {sendVerification, sendReset} = require('./emailService');
+const path = require('path');
+
 
 const PORT = process.env.PORT || 5000
 
