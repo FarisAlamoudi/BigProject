@@ -5,7 +5,7 @@ function Login()
 {
     const bp = require('./Path.js');
 
-    let Login;
+    let Username;
     let Password;
     let UserResetToken;
 
@@ -15,7 +15,7 @@ function Login()
     {
         event.preventDefault();
 
-        const js = JSON.stringify({Login:Login.value,Password:Password.value});
+        const js = JSON.stringify({Username:Username.value,Password:Password.value});
 
         document.getElementById('loginError').innerText = '';
         document.getElementById('passwordError').innerText = '';
@@ -49,7 +49,7 @@ function Login()
             {
                 res.errors.forEach(error =>
                 {
-                    if (error.path === 'Login')
+                    if (error.path === 'Username')
                     {
                         document.getElementById('loginError').innerText = error.msg;
                     }
