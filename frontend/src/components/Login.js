@@ -41,7 +41,7 @@ function Login()
                     jwtStorage.storeJWT(JWT);
 
                     setMessage('');
-                    window.location.href = '/resources';
+                    window.location.href = '/home';
                 }
                 catch (e)
                 {
