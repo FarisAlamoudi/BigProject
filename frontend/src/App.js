@@ -13,11 +13,11 @@ function App()
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<LoginPage/>}/>
-        <Route path="/reset" element={<ResetPage/>}/>
-        <Route path="/verify" element={<VerificationPage/>}/>
-        <Route path="/register" element={<LoginPage/>}/>
-        <Route path="/reserve" element={<ReservationPage/>}/>
+        <Route path="/" element={<LoginPage />}/>
+        <Route path="/reset" element={<ResetPage />}/>
+        <Route path="/verify" element={<VerificationPage />}/>
+        <Route path="/register" element={<RegisterPage />}/>
+        <Route path="/reserve" element={<ReservationPage />}/>
       </Routes>
     </BrowserRouter>
   );
