@@ -9,6 +9,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const {sendVerification, sendReset} = require('./emailService');
 const path = require('path');
+const { generateToken } = require('./jwtUtils');
 
 
 const PORT = process.env.PORT || 5000
@@ -133,13 +134,8 @@ app.post('/api/login', async(req, res) =>
         return res.status(401).send({error: 'Login/Password incorrect.'})
     if (user.EmailVerified)
     {
-        const token = jwt.sign(
-        {
-            _id: user._id, FirstName: user.FirstName, LastName: user.LastName, UserName: user.UserName,
-            Email: user.Email, Phone: user.Phone, IsAdmin: user.IsAdmin, EmailVerified: user.EmailVerified,
-            DarkMode: user.DarkMode, PublicInfo: user.PublicInfo, VerificationToken: user.VerificationToken
-        }, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '15m'})
-        return res.status(200).send({JWT: token})
+        const token = generateToken(user);
+        return res.status(200).send(token);
     }
     else
         return res.status(401).send({error: 'Must verify email address to login.'})

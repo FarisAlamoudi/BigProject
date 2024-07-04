@@ -1,5 +1,6 @@
 import React,{useState} from 'react';
 import {jwtDecode} from "jwt-decode";
+const jwtStorage = require('../jwtStorage.js');
 
 function Login()
 {
@@ -36,6 +37,9 @@ function Login()
                 try
                 {
                     localStorage.setItem('user_data', JSON.stringify(decoded));
+
+                    jwtStorage.storeJWT(JWT);
+
                     setMessage('');
                     window.location.href = '/resources';
                 }
