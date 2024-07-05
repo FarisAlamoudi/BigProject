@@ -9,7 +9,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const {sendVerification, sendReset} = require('./emailService');
 const path = require('path');
-const { generateToken } = require('./jwtUtils');
+const { generateToken, isTokenValid, refreshToken } = require('./jwtUtils');
 
 
 const PORT = process.env.PORT || 5000
@@ -345,27 +345,33 @@ app.post('/api/deletereservation', async(req, res) =>
 
 // incoming: Search
 // outgoing: RESERVATIONS || error
-app.post('/api/showreservations', async(req, res) =>
+app.post('/api/myreservations', async(req, res) =>
 {
-    const {Query} = req.body
-    let filter = {}
-    if (Query)
-    {
-        const fields = ['Comment']
-        filter = {$or: fields.map(field => ({[field]: {$regex: new RegExp(Query,'i')}}))}
+    var {userData, JWT} = req.body;
+
+    try {
+        if (await isTokenValid(JWT)) {
+
+            const reservations = await Reservation.find({User: userData.UserName});
+            const numOfReservations = reservations.length;
+
+            try{
+                JWT = refreshToken(JWT);
+            }
+            catch(e){
+                console.log(e.message);
+            }
+            res.status(200).json({numOfReservations: numOfReservations, reservations: reservations, ...JWT});
+        }
+        else{
+            const error = 'TokenExpired';
+            res.status(401).json(error);
+        }
     }
-    try
-    {
-        let reservations
-        if (Object.keys(filter).length === 0)
-            reservations = await Reservation.find().exec()
-        else
-            reservations = await Reservation.find(filter).exec()
-        return res.status(200).send({RESERVATIONS: reservations})
-    }
-    catch (error)
-    {
-        return res.status(500).send({error: error.message})
+    catch (e) {
+        console.log(e.message);
+        var r = { error: e.message, jwtToken: '' };
+        res.status(500).json(r);
     }
 })
 

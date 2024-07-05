@@ -14,6 +14,7 @@ function retrieveJWT () {
     }
     catch (e) {
         console.log(e.message);
+        return (e.message);
     }
     return JWT;
 }
