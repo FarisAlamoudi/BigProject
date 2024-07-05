@@ -39,7 +39,7 @@
 
 /*----------*/
 
-#loginDiv {
+#credDiv {
   margin: 60px 20%;
   background-color: #dcdbe0;
   border-radius: 60px;
@@ -47,7 +47,7 @@
   align-items: center;
 }
 
-.loginImage {
+.credImage {
   flex: 1;
   display: flex;
   /* align-items: center; Center vertical */
@@ -55,11 +55,11 @@
   padding: 60px 30px 60px 60px ;
 }
 
-.loginImage img {
+.credImage img {
   max-width: 100%;
 }
 
-.loginForm {
+.credForm {
   flex: 1;
   padding: 60px 60px 60px 30px ;
   /* display: flex;
@@ -70,52 +70,53 @@
 
 /*----------*/
 
-.loginForm input[type="text"], .loginForm input[type="password"] {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  font-size: 16px;
+.credForm input[type="submit"] {
+  width: 100%; /* Full width button */
+    padding: 15px; /* Larger padding for better touch area */
+    margin-top: 20px; /* Space above the button */
+    border-radius: 25px; /* Rounded corners for buttons */
+    border: none; /* Remove default border */
+    background-color: #ff7f00; /* Button color */
+    color: white; /* Text color */
+    font-size: 18px; /* Larger font size */
+    cursor: pointer;
 }
 
-.loginForm input[type="submit"] {
-  width: 100%;
-  padding: 15px;
-  margin: 20px 0;
-  border-radius: 25px;
-  border: none;
-  background-color: #ff7f00; /* Button color */
-  color: white;
-  font-size: 18px;
-  cursor: pointer;
-}
-
-.loginForm input[type="submit"]:hover {
+.credForm input[type="submit"]:hover {
   background-color: #e76e00; /* Darker button color on hover */
 }
 
-.loginForm #inner-title {
+.credForm a {
+  color: #ff7f00;
+  text-decoration: none;
+  font-size: 15px;
+}
+
+.credForm a:hover {
+  text-decoration: underline;
+}
+
+.credForm input[type="text"], .credForm input[type="password"] {
+  width: calc(100% - 20px); /* Full width with padding accounted for */
+    padding: 10px; /* Inner padding for a comfortable touch area */
+    margin: 10px 0; /* Vertical margin between elements */
+    border-radius: 5px; /* Rounded corners */
+    border: 1px solid #ccc; /* Light border */
+    box-sizing: border-box;
+}
+
+.credForm #inner-title {
   font-size: 24px;
   font-weight: bold;
   margin-bottom: 20px;
 }
 
-.loginForm #text {
-  font-size: 14px;
+.credForm #text {
+  font-size: 15px;
   color: #666;
 }
 
-.loginForm .error {
+.credForm .error {
   color: red;
   font-size: 12px;
-}
-
-.loginForm a {
-  color: #ff7f00;
-  text-decoration: none;
-}
-
-.loginForm a:hover {
-  text-decoration: underline;
 }

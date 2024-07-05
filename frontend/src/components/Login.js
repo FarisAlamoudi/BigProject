@@ -123,11 +123,11 @@ function Login()
     }
 
     return(
-        <div id="loginDiv">
-            <div className="loginImage">
+        <div id="credDiv">
+            <div className="credImage">
                 <img src="/loginImage.jpeg"/>
             </div>
-            <div className="loginForm">
+            <div className="credForm">
                 <span id="inner-title">Login</span>
                 <div>
                     <span id="text">Don't have an account? </span>
