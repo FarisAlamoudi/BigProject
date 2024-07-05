@@ -8,7 +8,7 @@ function generateToken(user) {
                 UserID: user._id, FirstName: user.FirstName, LastName: user.LastName, UserName: user.UserName,
                 Email: user.Email, Phone: user.Phone, IsAdmin: user.IsAdmin, EmailVerified: user.EmailVerified,
                 DarkMode: user.DarkMode, PublicInfo: user.PublicInfo, VerificationToken: user.VerificationToken
-            }, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '10s'})
+            }, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '15m'})
 
         var returnValue = { JWT: accessToken };
     }
