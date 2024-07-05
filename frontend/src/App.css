@@ -40,10 +40,9 @@
 /*----------*/
 
 #loginDiv {
-  margin: 100px;
-  padding: 100px;
+  margin: 60px 20%;
   background-color: #dcdbe0;
-  border-radius: 30px;
+  border-radius: 60px;
   display: flex;
   align-items: center;
 }
@@ -51,28 +50,28 @@
 .loginImage {
   flex: 1;
   display: flex;
-  align-items: center; /* Center vertically */
+  /* align-items: center; Center vertical */
   justify-content: center; /* Center horizontally */
+  padding: 60px 30px 60px 60px ;
 }
 
 .loginImage img {
-  max-width: 75%;
-  height: auto;
+  max-width: 100%;
 }
 
 .loginForm {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* Center horizontally */
-  justify-content: center; /* Center vertically */
-  text-align: center;
+  padding: 60px 60px 60px 30px ;
+  /* display: flex;
+  flex-direction: column;*/
+  /* align-items: center;  Center horizontally */
+  /* justify-content: center;  Center vertically */
 }
 
 /*----------*/
 
 .loginForm input[type="text"], .loginForm input[type="password"] {
-  width: 80%;
+  width: 100%;
   padding: 10px;
   margin: 10px 0;
   border-radius: 5px;
@@ -81,7 +80,7 @@
 }
 
 .loginForm input[type="submit"] {
-  width: 80%;
+  width: 100%;
   padding: 15px;
   margin: 20px 0;
   border-radius: 25px;
