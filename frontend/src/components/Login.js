@@ -1,11 +1,12 @@
 import React,{useState} from 'react';
 import {jwtDecode} from "jwt-decode";
+const jwtStorage = require('../jwtStorage.js');
 
 function Login()
 {
     const bp = require('./Path.js');
 
-    let Login;
+    let UserName;
     let Password;
     let UserResetToken;
 
@@ -15,7 +16,7 @@ function Login()
     {
         event.preventDefault();
 
-        const js = JSON.stringify({Login:Login.value,Password:Password.value});
+        const js = JSON.stringify({UserName:UserName.value,Password:Password.value});
 
         document.getElementById('loginError').innerText = '';
         document.getElementById('passwordError').innerText = '';
@@ -36,8 +37,11 @@ function Login()
                 try
                 {
                     localStorage.setItem('user_data', JSON.stringify(decoded));
+
+                    jwtStorage.storeJWT(JWT);
+
                     setMessage('');
-                    window.location.href = '/resources';
+                    window.location.href = '/home';
                 }
                 catch (e)
                 {
@@ -131,9 +135,9 @@ function Login()
                 </div>
                 <input
                     type="text"
-                    id="Login"
+                    id="UserName"
                     placeholder="Username"
-                    ref={(c) => (Login = c)}
+                    ref={(c) => (UserName = c)}
                 />
                 <span className="error" id="loginError"></span>
                 <input

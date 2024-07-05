@@ -2,8 +2,8 @@ const mongoose = require('mongoose')
 
 const ReservationSchema = new mongoose.Schema(
 {
-    UserID: {type: String, required: true},
-    ResourceID: {type: String, required: true},
+    User: {type: String, required: true},
+    Machine: {type: String, required: true},
     Comment: {type: String, required: true},
     Start: {type: Date, required: true},
     End: {type: Date, required: true}
