@@ -6,7 +6,7 @@ function Register()
 
     let FirstName;
     let LastName
-    let Login;
+    let UserName;
     let Password;
     let Email;
     let Phone;
@@ -20,13 +20,13 @@ function Register()
         const js = JSON.stringify(
         {
             FirstName:FirstName.value,LastName:LastName.value,
-            Login:Login.value,Password:Password.value,
+            UserName:UserName.value,Password:Password.value,
             Email:Email.value,Phone:Phone.value
         });
 
         document.getElementById('firstError').innerText = '';
         document.getElementById('lastError').innerText = '';
-        document.getElementById('loginError').innerText = '';
+        document.getElementById('UserNameError').innerText = '';
         document.getElementById('passwordError').innerText = '';
         document.getElementById('emailError').innerText = '';
         document.getElementById('phoneError').innerText = '';
@@ -57,9 +57,9 @@ function Register()
                     {
                         document.getElementById('lastError').innerText = error.msg;
                     }
-                    else if (error.path === 'Login')
+                    else if (error.path === 'UserName')
                     {
-                        document.getElementById('loginError').innerText = error.msg;
+                        document.getElementById('UserNameError').innerText = error.msg;
                     }
                     else if (error.path === 'Password')
                     {
@@ -94,7 +94,7 @@ function Register()
 
     return(
         <div id="registerDiv">
-            <span id="inner-title">REGISTER A NEW USER</span><br/>
+            <span id="inner-title">Register a new user</span><br/>
             <input
                 type="text"
                 id="FirstName"
@@ -102,6 +102,7 @@ function Register()
                 ref={(c) => (FirstName = c)}
             />
             <span className="error" id="firstError"></span>
+            <br/>
             <input
                 type="text"
                 id="LastName"
@@ -109,13 +110,15 @@ function Register()
                 ref={(c) => (LastName = c)}
             />
             <span className="error" id="lastError"></span>
+            <br/>
             <input
                 type="text"
-                id="Login"
+                id="UserName"
                 placeholder="User name"
-                ref={(c) => (Login = c)}
+                ref={(c) => (UserName = c)}
             />
-            <span className="error" id="loginError"></span>
+            <span className="error" id="UserNameError"></span>
+            <br/>
             <input
                 type="password"
                 id="Password"
@@ -123,6 +126,7 @@ function Register()
                 ref={(c) => (Password = c)}
             />
             <span className="error" id="passwordError"></span>
+            <br/>
             <input
                 type="text"
                 id="Email"
@@ -130,6 +134,7 @@ function Register()
                 ref={(c) => (Email = c)}
             />
             <span className="error" id="emailError"></span>
+            <br/>
             <input
                 type="password"
                 id="Phone"
@@ -137,6 +142,7 @@ function Register()
                 ref={(c) => (Phone = c)}
             />
             <span className="error" id="phoneError"></span>
+            <br/>
             <input
                 type="submit"
                 id="registerButton"

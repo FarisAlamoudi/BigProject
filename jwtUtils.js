@@ -1,33 +1,38 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-function generateToken(user)
-{
-    const payload =
-    {
-        UserID:user._id,FirstName:user.FirstName,LastName:user.LastName,Login:user.Login,
-        Email:user.Email,Phone:user.Phone,IsAdmin:user.IsAdmin,EmailVerified:user.EmailVerified,
-        DarkMode:user.DarkMode,PublicInfo:user.PublicInfo
-    };
-    const accessToken = jwt.sign(payload,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'15m'});
-    const refreshToken = jwt.sign(payload,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'});
-}
+function generateToken(user) {
+    try {
+        const accessToken = jwt.sign(
+            {
+                UserID: user._id, FirstName: user.FirstName, LastName: user.LastName, UserName: user.UserName,
+                Email: user.Email, Phone: user.Phone, IsAdmin: user.IsAdmin, EmailVerified: user.EmailVerified,
+                DarkMode: user.DarkMode, PublicInfo: user.PublicInfo, VerificationToken: user.VerificationToken
+            }, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '15m'})
 
-function authenticateToken(req)
-{
-    const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
-    return jwt.verify(token,process.env.ACCESS_TOKEN_SECRET);
-}
-
-function refreshToken(token)
-{
-    const decoded = jwt.verify(token,process.env.ACCESS_TOKEN_SECRET);
-    const payload =
-    {
-        UserID:decoded._id,FirstName:decoded.FirstName,LastName:decoded.LastName,Login:decoded.Login,
-        Email:decoded.Email,IsAdmin:decoded.IsAdmin,EmailVerified:decoded.EmailVerified
+        var returnValue = { JWT: accessToken };
     }
-    return jwt.sign(payload,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'});
+    catch (e) {
+        var returnValue = { error: e.message };
+    }
+    return returnValue;
 }
 
-module.exports = {generateToken,authenticateToken,refreshToken};
+async function isTokenValid(token){
+    return new Promise((resolve) => {
+      jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err) => {
+        if (err) {
+          resolve(false);
+        } else {
+          resolve(true);
+        }
+      });
+    });
+  }
+
+function refreshToken(token) {
+    const decoded = jwt.decode(token, { complete: true });
+    return generateToken(decoded.payload);
+}
+
+module.exports = { generateToken, isTokenValid, refreshToken };

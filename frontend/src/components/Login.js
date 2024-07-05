@@ -1,11 +1,12 @@
 import React,{useState} from 'react';
 import {jwtDecode} from "jwt-decode";
+const jwtStorage = require('../jwtStorage.js');
 
 function Login()
 {
     const bp = require('./Path.js');
 
-    let Login;
+    let UserName;
     let Password;
     let UserResetToken;
 
@@ -15,7 +16,7 @@ function Login()
     {
         event.preventDefault();
 
-        const js = JSON.stringify({Login:Login.value,Password:Password.value});
+        const js = JSON.stringify({UserName:UserName.value,Password:Password.value});
 
         document.getElementById('loginError').innerText = '';
         document.getElementById('passwordError').innerText = '';
@@ -36,8 +37,11 @@ function Login()
                 try
                 {
                     localStorage.setItem('user_data', JSON.stringify(decoded));
+
+                    jwtStorage.storeJWT(JWT);
+
                     setMessage('');
-                    window.location.href = '/resources';
+                    window.location.href = '/home';
                 }
                 catch (e)
                 {
@@ -120,45 +124,55 @@ function Login()
 
     return(
         <div id="loginDiv">
-            <span id="inner-title">LOG IN</span><br/>
-            <input
-                type="text"
-                id="Login"
-                placeholder="Username"
-                ref={(c) => (Login = c)}
-            />
-            <span className="error" id="loginError"></span>
-            <input
-                type="password"
-                id="Password"
-                placeholder="Password"
-                ref={(c) => (Password = c)}
-            />
-            <span className="error" id="passwordError"></span>
-            <input
-                type="submit"
-                id="loginButton"
-                className="buttons"
-                value="Login"
-                onClick={doLogin}
-            />
-            <span id="loginResult">{message}</span>
-            <input
-                type="submit"
-                id="registerButton"
-                className="buttons"
-                value="Register"
-                onClick={redirectToRegister}
-            />
-            <span id="text">Forgot your password?</span>
-            <input
-                type="submit"
-                id="registerButton"
-                className="buttons"
-                value="Click here to reset"
-                onClick={doReset}
-            />
-            <span id="resetError">{message}</span>
+            <div className="loginImage">
+                <img src="/loginImage.jpeg"/>
+            </div>
+            <div className="loginForm">
+                <span id="inner-title">Login</span>
+                <div>
+                    <span id="text">Don't have an account? </span>
+                    <input
+                        type="submit"
+                        id="registerButton"
+                        className="buttons"
+                        value="Create one"
+                        onClick={redirectToRegister}
+                    />
+                </div>
+                <input
+                    type="text"
+                    id="UserName"
+                    placeholder="Username"
+                    ref={(c) => (UserName = c)}
+                />
+                <span className="error" id="loginError"></span>
+                <input
+                    type="password"
+                    id="Password"
+                    placeholder="Password"
+                    ref={(c) => (Password = c)}
+                />
+                <span className="error" id="passwordError"></span>
+                <div>
+                    <span id="text">Forgot your password? </span>
+                    <input
+                        type="submit"
+                        id="resetButton"
+                        className="buttons"
+                        value="Click here to reset"
+                        onClick={doReset}
+                    />
+                    <span id="resetError">{message}</span>
+                            </div>
+                <input
+                    type="submit"
+                    id="loginButton"
+                    className="buttons"
+                    value="Login"
+                    onClick={doLogin}
+                />
+                <span id="loginResult">{message}</span>
+            </div>
         </div>
     );
 }
