@@ -93,72 +93,79 @@ function Register()
     }
 
     return(
-        <div id="registerDiv">
-            <span id="inner-title">Register a new user</span><br/>
-            <input
-                type="text"
-                id="FirstName"
-                placeholder="First name"
-                ref={(c) => (FirstName = c)}
-            />
-            <span className="error" id="firstError"></span>
-            <br/>
-            <input
-                type="text"
-                id="LastName"
-                placeholder="Last name"
-                ref={(c) => (LastName = c)}
-            />
-            <span className="error" id="lastError"></span>
-            <br/>
-            <input
-                type="text"
-                id="UserName"
-                placeholder="User name"
-                ref={(c) => (UserName = c)}
-            />
-            <span className="error" id="UserNameError"></span>
-            <br/>
-            <input
-                type="password"
-                id="Password"
-                placeholder="Password"
-                ref={(c) => (Password = c)}
-            />
-            <span className="error" id="passwordError"></span>
-            <br/>
-            <input
-                type="text"
-                id="Email"
-                placeholder="Email address"
-                ref={(c) => (Email = c)}
-            />
-            <span className="error" id="emailError"></span>
-            <br/>
-            <input
-                type="password"
-                id="Phone"
-                placeholder="Phone number"
-                ref={(c) => (Phone = c)}
-            />
-            <span className="error" id="phoneError"></span>
-            <br/>
-            <input
-                type="submit"
-                id="registerButton"
-                className="buttons"
-                value="Register"
-                onClick={doRegister}
-            />
-            <span id="registerResult">{message}</span>
-            <span id="text">OR</span>
-            <input
-                type="submit"
-                id="backButton"
-                className="buttons"
-                value="Back"
-                onClick={redirectToLogin}
-            />
+        <div id="credDiv">
+            <div className="credImage">
+                <img src="/loginImage.jpeg"/>
+            </div>
+            <div className="credForm">
+                <span id="inner-title">Register a new user</span><br/>
+                <input
+                    type="text"
+                    id="FirstName"
+                    placeholder="First name"
+                    ref={(c) => (FirstName = c)}
+                />
+                <span className="error" id="firstError"></span>
+                <br/>
+                <input
+                    type="text"
+                    id="LastName"
+                    placeholder="Last name"
+                    ref={(c) => (LastName = c)}
+                />
+                <span className="error" id="lastError"></span>
+                <br/>
+                <input
+                    type="text"
+                    id="UserName"
+                    placeholder="User name"
+                    ref={(c) => (UserName = c)}
+                />
+                <span className="error" id="UserNameError"></span>
+                <br/>
+                <input
+                    type="password"
+                    id="Password"
+                    placeholder="Password"
+                    ref={(c) => (Password = c)}
+                />
+                <span className="error" id="passwordError"></span>
+                <br/>
+                <input
+                    type="text"
+                    id="Email"
+                    placeholder="Email address"
+                    ref={(c) => (Email = c)}
+                />
+                <span className="error" id="emailError"></span>
+                <br/>
+                <input
+                    type="password"
+                    id="Phone"
+                    placeholder="Phone number"
+                    ref={(c) => (Phone = c)}
+                />
+                <span className="error" id="phoneError"></span>
+                <br/>
+                <div>
+                    <input
+                        type="submit"
+                        id="registerButton"
+                        className="buttons"
+                        value="Register"
+                        onClick={doRegister}
+                    />
+                    <span id="registerResult">{message}</span>
+                    <span id="text">OR</span>
+                    <input
+                        type="submit"
+                        id="backButton"
+                        className="buttons"
+                        value="Back"
+                        onClick={redirectToLogin}
+                    />
+                </div>
+            </div>
         </div>
     );
 }
