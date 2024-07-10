@@ -3,6 +3,7 @@ import 'package:reserve_smart/dbHelper/mongodb.dart';
 import 'package:reserve_smart/reserve.dart';
 import 'sign_up_page.dart'; // Import the SignUpPage
 import 'package:mongo_dart/mongo_dart.dart' as M;
+import 'package:mongo_dart_query/mongo_dart_query.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,9 +50,15 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> loginVerification(BuildContext context) async {
     var userCollection = MongoDatabase.userCollection;
+    //Using MongoDB Package 'Or' operator to check Email or Username with Password
     var user = await userCollection.findOne({
-      'Email': _emailController.text,
-      'Password': _passwordController.text,
+      '\$or': [
+        {'Email': _emailController.text, 'Password': _passwordController.text},
+        {
+          'UserName': _emailController.text,
+          'Password': _passwordController.text
+        }
+      ]
     });
     if (user != null) {
       // User found, proceed with login
@@ -60,13 +67,13 @@ class _LoginPageState extends State<LoginPage> {
         MaterialPageRoute(builder: (context) => const ReservePage()),
       );
     } else {
-      // User not found, show error message
+      //User not found, show error message
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Text('Login Error'),
-            content: const Text('Invalid username or password'),
+            content: const Text('Invalid Email/Username or Password'),
             actions: <Widget>[
               TextButton(
                 child: const Text('OK'),
@@ -130,7 +137,7 @@ class _LoginPageState extends State<LoginPage> {
                               color: Color.fromARGB(255, 18, 58, 26),
                               width: 2.0),
                         ),
-                        labelText: 'Email',
+                        labelText: 'Email or Username',
                       ),
                     ),
                   ),
