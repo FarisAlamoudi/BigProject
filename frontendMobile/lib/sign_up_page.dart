@@ -19,6 +19,8 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   var _id = M.ObjectId();
+  //Create a GlobalKey for Register Form Validation
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
@@ -31,6 +33,7 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
+  //Send all inputs to MongoUsers to translate info to proper format for MongoDB
   Future<void> signUp(BuildContext context) async {
     final data = MongoUsers(
         id: _id,
@@ -46,16 +49,10 @@ class _SignUpPageState extends State<SignUpPage> {
         publicInfo: false,
         verificationToken: "");
 
+    //Send info to Database
     String user = await MongoDatabase.insert(data);
-    //var user = await userCollection.insert(data);
-    // var user = await userCollection.insert({
-    //   'FirstName': _firstNameController.text,
-    //   'LastName': _lastNameController.text,
-    //   'UserName': _usernameController.text,
-    //   'Password': _passwordController.text, //Hash
-    //   'Email': _emailController.text,
-    //   'PhoneNumber': _phoneNumberController.text,
-    // });
+
+    //if Info didn't fail to store in Database - Go to Reservation Page
     if (user != "Insert Failed") {
       // User added successfully, navigate to LoginPage
       Navigator.push(
@@ -69,7 +66,8 @@ class _SignUpPageState extends State<SignUpPage> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Text('Sign Up Error'),
-            content: const Text('Invalid entry'),
+            content: const Text(
+                'Invalid Entry or Entry Already Taken\n (Phone Number, Username, Email)'),
             actions: <Widget>[
               TextButton(
                 child: const Text('OK'),
@@ -87,146 +85,203 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: <Widget>[
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                const SizedBox(height: 175),
-                const Text(
-                  'Create Your Account',
-                  style: TextStyle(
-                    fontSize: 45,
-                    fontFamily: 'Cairo',
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 18, 58, 26),
-                  ),
-                ),
-                const SizedBox(height: 100),
-                TextField(
-                  controller: _firstNameController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(200.0),
-                      borderSide: const BorderSide(
-                          color: Color.fromARGB(255, 18, 58, 26), width: 2.0),
+      body: Form(
+        key: _formKey, //Associate GlobalKey with this Form
+        child: ListView(
+          padding: const EdgeInsets.all(16.0),
+          children: <Widget>[
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  const SizedBox(height: 175),
+                  const Text(
+                    'Create Your Account',
+                    style: TextStyle(
+                      fontSize: 45,
+                      fontFamily: 'Cairo',
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromARGB(255, 18, 58, 26),
                     ),
-                    labelText: 'First Name',
                   ),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: _lastNameController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(200.0),
-                      borderSide: const BorderSide(
-                          color: Color.fromARGB(255, 18, 58, 26), width: 2.0),
+                  const SizedBox(height: 100),
+                  TextFormField(
+                    controller: _firstNameController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(200.0),
+                        borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 18, 58, 26), width: 2.0),
+                      ),
+                      labelText: 'First Name',
                     ),
-                    labelText: 'Last Name',
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter First Name';
+                      }
+                    },
+                    autovalidateMode: AutovalidateMode
+                        .onUserInteraction, //First Name Validation as User is typing in box
                   ),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: _phoneNumberController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(200.0),
-                      borderSide: const BorderSide(
-                          color: Color.fromARGB(255, 18, 58, 26), width: 2.0),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: _lastNameController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(200.0),
+                        borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 18, 58, 26), width: 2.0),
+                      ),
+                      labelText: 'Last Name',
                     ),
-                    labelText: 'Phone Number',
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter Last Name';
+                      }
+                    },
+                    autovalidateMode: AutovalidateMode
+                        .onUserInteraction, //Last Name Validation as User is typing in box
                   ),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: _usernameController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(200.0),
-                      borderSide: const BorderSide(
-                          color: Color.fromARGB(255, 18, 58, 26), width: 2.0),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: _phoneNumberController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(200.0),
+                        borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 18, 58, 26), width: 2.0),
+                      ),
+                      labelText: 'Phone Number',
                     ),
-                    labelText: 'Username',
+                    validator: (value) {
+                      //String pattern = r'(^(?:[+0]9)?[0-9]{10,12}$)'; // XXX-XXX-XXXX Format
+                      String pattern = r'^\d{10}$'; //Format of any 10 Digits
+                      RegExp regex = new RegExp(pattern);
+                      if (value != null && !regex.hasMatch(value)) {
+                        return 'Enter 10 Digit Phone Number (XXXXXXXXXX)';
+                      } else {
+                        return null;
+                      }
+                    },
+                    autovalidateMode: AutovalidateMode
+                        .onUserInteraction, //Email Validation as User is typing in box
                   ),
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(200.0),
-                      borderSide: const BorderSide(
-                          color: Color.fromARGB(255, 18, 58, 26), width: 2.0),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: _usernameController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(200.0),
+                        borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 18, 58, 26), width: 2.0),
+                      ),
+                      labelText: 'Username',
                     ),
-                    labelText: 'Email',
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter Username';
+                      }
+                    },
+                    autovalidateMode: AutovalidateMode
+                        .onUserInteraction, //Username Validation as User is typing in box
                   ),
-                  validator: (value) {
-                    String pattern =
-                        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-                    RegExp regex = new RegExp(pattern);
-                    if (value != null && !regex.hasMatch(value))
-                      return 'Enter Valid Email';
-                    else
-                      return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: _passwordController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(200.0),
-                      borderSide: const BorderSide(
-                          color: Color.fromARGB(255, 18, 58, 26), width: 2.0),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(200.0),
+                        borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 18, 58, 26), width: 2.0),
+                      ),
+                      labelText: 'Email',
                     ),
-                    labelText: 'Password',
+                    validator: (value) {
+                      String pattern =
+                          r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+                      RegExp regex = new RegExp(pattern);
+                      if (value != null && !regex.hasMatch(value)) {
+                        return 'Enter Valid Email (XXX@XXX.XXX)';
+                      } else {
+                        return null;
+                      }
+                    },
+                    autovalidateMode: AutovalidateMode
+                        .onUserInteraction, //Email Validation as User is typing in box
                   ),
-                  obscureText: true,
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: SizedBox(
-                        height: 50, // Adjusted height to match other fields
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // Handle sign up logic here
-                            signUp(context);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(200.0),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: _passwordController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(200.0),
+                        borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 18, 58, 26), width: 2.0),
+                      ),
+                      labelText: 'Password',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter Password';
+                      }
+                    },
+                    autovalidateMode: AutovalidateMode
+                        .onUserInteraction, //Password Validation as User is typing in box
+                    obscureText: true,
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: SizedBox(
+                          height: 50, // Adjusted height to match other fields
+                          child: ElevatedButton(
+                            onPressed: () {
+                              //Validate the form entries before Approving Sign Up
+                              if (_formKey.currentState != null &&
+                                  _formKey.currentState!.validate()) {
+                                //If validation passes, call the signUp function to Attempt SignUp
+                                signUp(context);
+                              } else {
+                                //If validation fails, call setState to trigger a UI refresh keeping user on the screen
+                                setState(() {
+                                  //This empty setState call will trigger a rebuild of the widget,
+                                });
+                                print(
+                                    'Please enter valid data'); //Displayed in debug console, not for User
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(200.0),
+                              ),
                             ),
-                          ),
-                          child: const Text(
-                            'Sign Up',
-                            style: TextStyle(fontSize: 20),
+                            child: const Text(
+                              'Sign Up',
+                              style: TextStyle(fontSize: 20),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                TextButton(
-                  onPressed: () {
-                    // Navigate to LoginPage
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const LoginPage()),
-                    );
-                  },
-                  child: const Text('Have an account? Login!'),
-                ),
-              ],
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  TextButton(
+                    onPressed: () {
+                      //Navigate to LoginPage
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const LoginPage()),
+                      );
+                    },
+                    child: const Text('Have an account? Login!'),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
