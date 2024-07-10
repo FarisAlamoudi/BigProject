@@ -52,7 +52,7 @@ class _SignUpPageState extends State<SignUpPage> {
     //Send info to Database
     String user = await MongoDatabase.insert(data);
 
-    //if Info didn't fail to store in Database - Go to Reservation Page
+    //if Info didn't fail to store in Database - Go to Login Page
     if (user != "Insert Failed") {
       // User added successfully, navigate to LoginPage
       Navigator.push(
@@ -117,7 +117,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter First Name';
+                        return 'Please Enter First Name';
                       }
                     },
                     autovalidateMode: AutovalidateMode
@@ -136,7 +136,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter Last Name';
+                        return 'Please Enter Last Name';
                       }
                     },
                     autovalidateMode: AutovalidateMode
@@ -179,7 +179,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter Username';
+                        return 'Please Enter Username';
                       }
                     },
                     autovalidateMode: AutovalidateMode
@@ -201,7 +201,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
                       RegExp regex = new RegExp(pattern);
                       if (value != null && !regex.hasMatch(value)) {
-                        return 'Enter Valid Email (XXX@XXX.XXX)';
+                        return 'Enter Valid Email (name@example.com)';
                       } else {
                         return null;
                       }
@@ -221,8 +221,13 @@ class _SignUpPageState extends State<SignUpPage> {
                       labelText: 'Password',
                     ),
                     validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter Password';
+                      String pattern =
+                          r'^(?=.*[a-zA-Z])(?=.*\d).{5,}$'; //5 Chars, 1 Letter, 1 Number
+                      RegExp regex = new RegExp(pattern);
+                      if (value != null && !regex.hasMatch(value)) {
+                        return 'Must Have:\n-At Least 5 Characters\n-At Least 1 Letter\n-At Least 1 Number';
+                      } else {
+                        return null;
                       }
                     },
                     autovalidateMode: AutovalidateMode
@@ -248,7 +253,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                   //This empty setState call will trigger a rebuild of the widget,
                                 });
                                 print(
-                                    'Please enter valid data'); //Displayed in debug console, not for User
+                                    'Please Enter valid data'); //Displayed in debug console, not for User
                               }
                             },
                             style: ElevatedButton.styleFrom(
