@@ -61,10 +61,12 @@ class _LoginPageState extends State<LoginPage> {
       ]
     });
     if (user != null) {
-      // User found, proceed with login
+      //User found, proceed with login
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const ReservePage()),
+        MaterialPageRoute(
+            builder: (context) => ReservePage(
+                user: _emailController.text)), //Pass User/Email to Reserve Page
       );
     } else {
       //User not found, show error message
