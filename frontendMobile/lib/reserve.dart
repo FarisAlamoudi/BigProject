@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:reserve_smart/main.dart';
+import 'package:intl/intl.dart';
 import 'package:reserve_smart/dbHelper/mongodb.dart';
-import 'package:mongo_dart/mongo_dart.dart' as M;
+import 'date_selector.dart';
 
 class ReservePage extends StatefulWidget {
   final String user;
@@ -12,108 +12,140 @@ class ReservePage extends StatefulWidget {
 }
 
 class _ReservePageState extends State<ReservePage> {
+  DateTime selectedDate = DateTime.now();
+  Future<List<Map<String, dynamic>>>? reservationFuture;
+  List<Map<String, dynamic>> reservations = [];
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      userVerification(context);
+    fetchReservationsForSelectedDate();
+  }
+
+  void fetchReservationsForSelectedDate() {
+    setState(() {
+      reservationFuture = userVerification(selectedDate);
+      reservationFuture!.then((res) {
+        setState(() {
+          reservations = res;
+        });
+      });
     });
   }
 
-  Future<List<Map<String, dynamic>>> userVerification(
-      BuildContext context) async {
+  Future<List<Map<String, dynamic>>> userVerification(DateTime date) async {
     var reserveCollection = MongoDatabase.reserveCollection;
     var userCollection = MongoDatabase.userCollection;
 
-    //Check if provided value is an Email or Username
     bool isEmail = widget.user.contains('@');
-
     String username;
+
     if (isEmail) {
-      //If it's an Email, get corresponding Username
       var userDoc = await userCollection.findOne({'Email': widget.user});
-      username = userDoc['UserName'];
+      if (userDoc != null) {
+        username = userDoc['UserName'];
+      } else {
+        return [];
+      }
     } else {
-      //If it's already a Username, don't do anything
       username = widget.user;
     }
 
-    //Using MongoDB to check reservations for the user
-    var reservations =
-        await reserveCollection.find({'User': username}).toList();
+    DateTime startOfDay = DateTime(date.year, date.month, date.day, 0, 0, 0);
+    DateTime endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
 
-    if (reservations.isNotEmpty) {
-      //For Debug console to List UserName & rsvp ID
-      for (var reservation in reservations) {
-        print('Reservation ID: ${reservation["_id"]}');
-        print('User: ${reservation["User"]}');
-      }
-      //Reservations found, Return info to display them
-      return reservations;
-    } else {
-      //No Reservations, Return Empty list
-      return [];
-    }
+    var reservations = await reserveCollection.find({
+      'User': username,
+      'Start': {'\$gte': startOfDay, '\$lt': endOfDay}
+    }).toList();
+
+    return reservations;
   }
 
   @override
   Widget build(BuildContext context) {
+    List<Map<String, dynamic>> sortedReservations = List.from(reservations);
+    sortedReservations.sort((a, b) {
+      DateTime startA = DateTime.tryParse(a['Start'].toString()) ?? DateTime.now();
+      DateTime startB = DateTime.tryParse(b['Start'].toString()) ?? DateTime.now();
+      return startA.compareTo(startB);
+    });
+
     return Scaffold(
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: <Widget>[
-          const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                SizedBox(height: 175),
-                Text(
-                  'Reservations',
-                  style: TextStyle(
-                    fontSize: 45,
-                    fontFamily: 'Cairo',
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 18, 58, 26),
-                  ),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(130.0),
+        child: AppBar(
+          backgroundColor: const Color.fromARGB(255, 18, 58, 26),
+          flexibleSpace: const Center(
+            child: Padding(
+              padding: EdgeInsets.only(top: 25.0),
+              child: Text(
+                'Reservations',
+                style: TextStyle(
+                  fontSize: 55,
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
-              ],
+              ),
             ),
           ),
-          FutureBuilder(
-            //Waits for userVerification function to finish getting Reservations
-            //If they exist it displays them
-            future: userVerification(context),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else {
-                List<Widget> reservationWidgets = [];
-                if (snapshot.data != null) {
-                  for (var reservation
-                      in snapshot.data as List<Map<String, dynamic>>) {
-                    reservationWidgets.add(
-                      Card(
-                        child: ListTile(
-                          title: Text('Machine: ${reservation["Machine"]}'),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text('Start: ${reservation["Start"]}'),
-                              Text('End: ${reservation["End"]}'),
-                              Text('Comment: ${reservation["Comment"]}'),
-                            ],
+        ),
+      ),
+      body: Column(
+        children: [
+          WeekDaysSelector(
+            onDateSelected: (date) {
+              setState(() {
+                selectedDate = date;
+                fetchReservationsForSelectedDate();
+              });
+            },
+            reservations: sortedReservations,
+          ),
+          Expanded(
+            child: FutureBuilder<List<Map<String, dynamic>>>(
+              future: reservationFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (snapshot.hasData) {
+                  if (snapshot.data!.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 125.0),
+                            child: Image.asset(
+                              'assets/SleepingBrain.png',
+                              height: 275,
+                            ),
                           ),
-                        ),
+                          const SizedBox(height: 0),
+                          const Text(
+                            'No reservations found.',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
                       ),
                     );
+                  } else {
+                    return const SizedBox.shrink();
                   }
+                } else {
+                  return const SizedBox.shrink();
                 }
-                return Column(children: reservationWidgets);
-              }
-            },
-          ),
+              },
+            ),
+          )
         ],
       ),
     );
