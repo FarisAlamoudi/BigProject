@@ -1,177 +1,153 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:reserve_smart/dbHelper/mongodb.dart';
+import 'date_selector.dart';
 
-class WeekDaysSelector extends StatefulWidget {
-  final Function(DateTime) onDateSelected;
-  final List<Map<String, dynamic>> reservations;
-
-  const WeekDaysSelector({
-    required this.onDateSelected,
-    required this.reservations,
-    Key? key,
-  }) : super(key: key);
+class ReservePage extends StatefulWidget {
+  final String user;
+  const ReservePage({super.key, required this.user});
 
   @override
-  _WeekDaysSelectorState createState() => _WeekDaysSelectorState();
+  _ReservePageState createState() => _ReservePageState();
 }
 
-class _WeekDaysSelectorState extends State<WeekDaysSelector> {
-  DateTime currentWeekStart = DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1));
+class _ReservePageState extends State<ReservePage> {
   DateTime selectedDate = DateTime.now();
+  Future<List<Map<String, dynamic>>>? reservationFuture;
+  List<Map<String, dynamic>> reservations = [];
 
-  String get formattedWeekRange {
-    DateTime endOfWeek = currentWeekStart.add(const Duration(days: 6));
-    return '${DateFormat('EEEE, MMMM d').format(currentWeekStart)} - ${DateFormat('EEEE, MMMM d').format(endOfWeek)}';
+  @override
+  void initState() {
+    super.initState();
+    fetchReservationsForSelectedDate();
   }
 
-  String get formattedSelectedDate {
-    return DateFormat('EEEE, MMMM d').format(selectedDate);
-  }
-
-  List<String> get days {
-    return List.generate(7, (index) {
-      DateTime day = currentWeekStart.add(Duration(days: index));
-      return DateFormat('d').format(day);
+  void fetchReservationsForSelectedDate() {
+    setState(() {
+      reservationFuture = userVerification(selectedDate);
+      reservationFuture!.then((res) {
+        setState(() {
+          reservations = res;
+        });
+      });
     });
   }
 
-  void previousWeek() {
-    setState(() {
-      currentWeekStart = currentWeekStart.subtract(const Duration(days: 7));
-      if (selectedDate.isBefore(currentWeekStart)) {
-        selectedDate = currentWeekStart;
+  Future<List<Map<String, dynamic>>> userVerification(DateTime date) async {
+    var reserveCollection = MongoDatabase.reserveCollection;
+    var userCollection = MongoDatabase.userCollection;
+
+    bool isEmail = widget.user.contains('@');
+    String username;
+
+    if (isEmail) {
+      var userDoc = await userCollection.findOne({'Email': widget.user});
+      if (userDoc != null) {
+        username = userDoc['UserName'];
+      } else {
+        return [];
       }
-    });
-  }
+    } else {
+      username = widget.user;
+    }
 
-  void nextWeek() {
-    setState(() {
-      currentWeekStart = currentWeekStart.add(const Duration(days: 7));
-      if (selectedDate.isAfter(currentWeekStart.add(const Duration(days: 6)))) {
-        selectedDate = currentWeekStart.add(const Duration(days: 6));
-      }
-    });
-  }
+    DateTime startOfDay = DateTime(date.year, date.month, date.day, 0, 0, 0);
+    DateTime endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
 
-  void selectDate(int dayOffset) {
-    setState(() {
-      selectedDate = currentWeekStart.add(Duration(days: dayOffset));
-      widget.onDateSelected(selectedDate);
-    });
+    var reservations = await reserveCollection.find({
+      'User': username,
+      'Start': {'\$gte': startOfDay, '\$lt': endOfDay}
+    }).toList();
+
+    return reservations;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 25),
-        Padding(
-          padding: const EdgeInsets.only(left: 16.0),
-          child: Text(
-            formattedSelectedDate,
-            style: const TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        const SizedBox(height: 15),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: previousWeek,
-            ),
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(7, (index) {
-                  return GestureDetector(
-                    onTap: () => selectDate(index),
-                    child: Column(
-                      children: [
-                        Text(
-                          DateFormat('E').format(currentWeekStart.add(Duration(days: index))),
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: selectedDate == currentWeekStart.add(Duration(days: index))
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: selectedDate == currentWeekStart.add(Duration(days: index))
-                                ? const Color.fromARGB(255, 88, 149, 235)
-                                : const Color.fromARGB(255, 18, 58, 26),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Text(
-                              days[index],
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: selectedDate == currentWeekStart.add(Duration(days: index))
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }),
+    List<Map<String, dynamic>> sortedReservations = List.from(reservations);
+    sortedReservations.sort((a, b) {
+      DateTime startA = DateTime.tryParse(a['Start'].toString()) ?? DateTime.now();
+      DateTime startB = DateTime.tryParse(b['Start'].toString()) ?? DateTime.now();
+      return startA.compareTo(startB);
+    });
+
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(130.0),
+        child: AppBar(
+          backgroundColor: const Color.fromARGB(255, 18, 58, 26),
+          flexibleSpace: const Center(
+            child: Padding(
+              padding: EdgeInsets.only(top: 25.0),
+              child: Text(
+                'Reservations',
+                style: TextStyle(
+                  fontSize: 55,
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
-            IconButton(
-              icon: const Icon(Icons.arrow_forward),
-              onPressed: nextWeek,
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 10),
-              if (widget.reservations.isNotEmpty)
-                Column(
-                  children: widget.reservations.map((reservation) {
-                    DateTime start = DateTime.parse(reservation["Start"].toString());
-                    DateTime end = DateTime.parse(reservation["End"].toString());
-
-                    String startTime = DateFormat('h:mm a').format(start);
-                    String endTime = DateFormat('h:mm a').format(end);
-
-                    return Card(
-                      margin: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: ListTile(
-                        title: Text('${reservation["Machine"] ?? "N/A"}'),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text('$startTime - $endTime'),
-                            const SizedBox(height: 5),
-                            Text('${reservation["Comment"] ?? "No comment"}'),
-                          ],
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                )
-            ],
           ),
         ),
-      ],
+      ),
+      body: Column(
+        children: [
+          WeekDaysSelector(
+            onDateSelected: (date) {
+              setState(() {
+                selectedDate = date;
+                fetchReservationsForSelectedDate();
+              });
+            },
+            reservations: sortedReservations,
+          ),
+          Expanded(
+            child: FutureBuilder<List<Map<String, dynamic>>>(
+              future: reservationFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (snapshot.hasData) {
+                  if (snapshot.data!.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 125.0),
+                            child: Image.asset(
+                              'assets/SleepingBrain.png',
+                              height: 275,
+                            ),
+                          ),
+                          const SizedBox(height: 0),
+                          const Text(
+                            'No reservations found.',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else {
+                    return const SizedBox.shrink();
+                  }
+                } else {
+                  return const SizedBox.shrink();
+                }
+              },
+            ),
+          )
+        ],
+      ),
     );
   }
 }
