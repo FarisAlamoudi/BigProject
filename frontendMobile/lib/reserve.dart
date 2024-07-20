@@ -66,10 +66,24 @@ class _ReservePageState extends State<ReservePage> {
   Widget build(BuildContext context) {
     List<Map<String, dynamic>> sortedReservations = List.from(reservations);
     sortedReservations.sort((a, b) {
-      DateTime startA = DateTime.tryParse(a['Start'].toString()) ?? DateTime.now();
-      DateTime startB = DateTime.tryParse(b['Start'].toString()) ?? DateTime.now();
+      DateTime startA =
+          DateTime.tryParse(a['Start'].toString()) ?? DateTime.now();
+      DateTime startB =
+          DateTime.tryParse(b['Start'].toString()) ?? DateTime.now();
       return startA.compareTo(startB);
     });
+
+    Widget buildWeekDaysSelector() {
+      return WeekDaysSelector(
+        onDateSelected: (date) {
+          setState(() {
+            selectedDate = date;
+            fetchReservationsForSelectedDate();
+          });
+        },
+        reservations: sortedReservations,
+      );
+    }
 
     return Scaffold(
       appBar: PreferredSize(
@@ -92,60 +106,50 @@ class _ReservePageState extends State<ReservePage> {
           ),
         ),
       ),
-      body: Column(
+      body: ListView(
         children: [
-          WeekDaysSelector(
-            onDateSelected: (date) {
-              setState(() {
-                selectedDate = date;
-                fetchReservationsForSelectedDate();
-              });
-            },
-            reservations: sortedReservations,
-          ),
-          Expanded(
-            child: FutureBuilder<List<Map<String, dynamic>>>(
-              future: reservationFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (snapshot.hasData) {
-                  if (snapshot.data!.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(top: 125.0),
-                            child: Image.asset(
-                              'assets/SleepingBrain.png',
-                              height: 275,
-                            ),
+          buildWeekDaysSelector(),
+          FutureBuilder<List<Map<String, dynamic>>>(
+            future: reservationFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else if (snapshot.hasData) {
+                if (snapshot.data!.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10.0),
+                          child: Image.asset(
+                            'assets/SleepingBrain.png',
+                            height: 275,
                           ),
-                          const SizedBox(height: 0),
-                          const Text(
-                            'No reservations found.',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
+                        ),
+                        const SizedBox(height: 0),
+                        const Text(
+                          'No reservations found.',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
                           ),
-                        ],
-                      ),
-                    );
-                  } else {
-                    return const SizedBox.shrink();
-                  }
+                        ),
+                      ],
+                    ),
+                  );
                 } else {
                   return const SizedBox.shrink();
                 }
-              },
-            ),
-          )
+              } else {
+                return const SizedBox.shrink();
+              }
+            },
+          ),
         ],
       ),
     );
