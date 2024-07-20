@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:reserve_smart/dbHelper/mongodb.dart';
 import 'package:reserve_smart/reserve.dart';
 import 'sign_up_page.dart'; // Import the SignUpPage
-import 'package:mongo_dart/mongo_dart.dart' as M;
-import 'package:mongo_dart_query/mongo_dart_query.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,17 +10,18 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'ReserveSmart',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: Colors.brown,
-        ).copyWith(
+        scaffoldBackgroundColor: Colors.white,
+        primaryColor: const Color.fromARGB(255, 18, 58, 26),
+        colorScheme: ColorScheme.fromSwatch().copyWith(
           primary: const Color.fromARGB(255, 18, 58, 26),
+          secondary: const Color.fromARGB(255, 18, 58, 26),
         ),
       ),
       home: const LoginPage(),
@@ -31,7 +30,7 @@ class MyApp extends StatelessWidget {
 }
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
 
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -99,15 +98,15 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             Container(
               alignment: Alignment.center,
-              padding: const EdgeInsets.all(0.0),
+              padding: const EdgeInsets.all(40.0),
               child: Column(
                 children: [
                   Image.asset(
                     'assets/Logo2.png',
-                    height: 150,
-                    width: 150,
+                    height: 350,
+                    width: 350,
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 20),
                   const Text(
                     'Welcome to ReserveSmart!',
                     style: TextStyle(
@@ -120,7 +119,7 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
             ),
-            const SizedBox(height: 45),
+            const SizedBox(height: 0),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -133,17 +132,25 @@ class _LoginPageState extends State<LoginPage> {
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.symmetric(
                             vertical: 15.0, horizontal: 15),
-                        border: OutlineInputBorder(
+                        enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(200.0),
                           borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 18, 58, 26),
-                              width: 2.0),
+                            color: Color.fromARGB(255, 18, 58, 26),
+                            width: 2.0,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(200.0),
+                          borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 18, 58, 26),
+                            width: 2.0,
+                          ),
                         ),
                         labelText: 'Email or Username',
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 40),
                   SizedBox(
                     height: 50,
                     child: TextField(
@@ -151,23 +158,35 @@ class _LoginPageState extends State<LoginPage> {
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.symmetric(
                             vertical: 15.0, horizontal: 15),
-                        border: OutlineInputBorder(
+                        enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(200.0),
+                          borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 18, 58, 26),
+                            width: 2.0,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(200.0),
+                          borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 18, 58, 26),
+                            width: 2.0,
+                          ),
                         ),
                         labelText: 'Password',
                       ),
                       obscureText: true,
                     ),
                   ),
-                  const SizedBox(height: 25),
+                  const SizedBox(height: 40),
                   SizedBox(
-                    height: 45,
+                    height: 50,
                     child: ElevatedButton(
                       onPressed: () {
                         //Verify Login Credentials
                         loginVerification(context);
                       },
                       style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white, backgroundColor: const Color.fromARGB(255,18,58,26),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(200.0),
                         ),

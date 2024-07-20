@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:reserve_smart/main.dart';
 import 'package:reserve_smart/dbHelper/mongodb.dart';
 import 'package:mongo_dart/mongo_dart.dart' as M;
-import 'package:reserve_smart/mongoUsers.dart';
+import 'package:reserve_smart/mongo_users.dart';
 
 class SignUpPage extends StatefulWidget {
-  const SignUpPage({Key? key}) : super(key: key);
+  const SignUpPage({super.key});
 
   @override
   _SignUpPageState createState() => _SignUpPageState();
@@ -18,7 +18,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
-  var _id = M.ObjectId();
+  final _id = M.ObjectId();
   //Create a GlobalKey for Register Form Validation
   final _formKey = GlobalKey<FormState>();
 
@@ -88,13 +88,13 @@ class _SignUpPageState extends State<SignUpPage> {
       body: Form(
         key: _formKey, //Associate GlobalKey with this Form
         child: ListView(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(15.0),
           children: <Widget>[
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  const SizedBox(height: 175),
+                  const SizedBox(height: 70),
                   const Text(
                     'Create Your Account',
                     style: TextStyle(
@@ -104,59 +104,88 @@ class _SignUpPageState extends State<SignUpPage> {
                       color: Color.fromARGB(255, 18, 58, 26),
                     ),
                   ),
-                  const SizedBox(height: 100),
+                  const SizedBox(height: 50),
                   TextFormField(
                     controller: _firstNameController,
                     decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(200.0),
-                        borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 18, 58, 26), width: 2.0),
-                      ),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(200.0),
+                          borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 18, 58, 26), // Green border color
+                            width: 2.0,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(200.0),
+                          borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 18, 58, 26), // Green border color
+                            width: 2.0,
+                          ),
+                        ),
                       labelText: 'First Name',
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please Enter First Name';
                       }
+                      return null;
                     },
                     autovalidateMode: AutovalidateMode
                         .onUserInteraction, //First Name Validation as User is typing in box
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 40),
                   TextFormField(
                     controller: _lastNameController,
                     decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(200.0),
-                        borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 18, 58, 26), width: 2.0),
-                      ),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(200.0),
+                          borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 18, 58, 26), // Green border color
+                            width: 2.0,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(200.0),
+                          borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 18, 58, 26), // Green border color
+                            width: 2.0,
+                          ),
+                        ),
                       labelText: 'Last Name',
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please Enter Last Name';
                       }
+                      return null;
                     },
                     autovalidateMode: AutovalidateMode
                         .onUserInteraction, //Last Name Validation as User is typing in box
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 40),
                   TextFormField(
                     controller: _phoneNumberController,
                     decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(200.0),
-                        borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 18, 58, 26), width: 2.0),
-                      ),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(200.0),
+                          borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 18, 58, 26), // Green border color
+                            width: 2.0,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(200.0),
+                          borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 18, 58, 26), // Green border color
+                            width: 2.0,
+                          ),
+                        ),
                       labelText: 'Phone Number',
                     ),
                     validator: (value) {
                       //String pattern = r'(^(?:[+0]9)?[0-9]{10,12}$)'; // XXX-XXX-XXXX Format
                       String pattern = r'^\d{10}$'; //Format of any 10 Digits
-                      RegExp regex = new RegExp(pattern);
+                      RegExp regex = RegExp(pattern);
                       if (value != null && !regex.hasMatch(value)) {
                         return 'Enter 10 Digit Phone Number (XXXXXXXXXX)';
                       } else {
@@ -166,40 +195,59 @@ class _SignUpPageState extends State<SignUpPage> {
                     autovalidateMode: AutovalidateMode
                         .onUserInteraction, //Email Validation as User is typing in box
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 40),
                   TextFormField(
                     controller: _usernameController,
                     decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(200.0),
-                        borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 18, 58, 26), width: 2.0),
-                      ),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(200.0),
+                          borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 18, 58, 26), // Green border color
+                            width: 2.0,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(200.0),
+                          borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 18, 58, 26), // Green border color
+                            width: 2.0,
+                          ),
+                        ),
                       labelText: 'Username',
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please Enter Username';
                       }
+                      return null;
                     },
                     autovalidateMode: AutovalidateMode
                         .onUserInteraction, //Username Validation as User is typing in box
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 40),
                   TextFormField(
                     controller: _emailController,
                     decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(200.0),
-                        borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 18, 58, 26), width: 2.0),
-                      ),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(200.0),
+                          borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 18, 58, 26), // Green border color
+                            width: 2.0,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(200.0),
+                          borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 18, 58, 26), // Green border color
+                            width: 2.0,
+                          ),
+                        ),
                       labelText: 'Email',
                     ),
                     validator: (value) {
                       String pattern =
                           r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-                      RegExp regex = new RegExp(pattern);
+                      RegExp regex = RegExp(pattern);
                       if (value != null && !regex.hasMatch(value)) {
                         return 'Enter Valid Email (name@example.com)';
                       } else {
@@ -209,21 +257,37 @@ class _SignUpPageState extends State<SignUpPage> {
                     autovalidateMode: AutovalidateMode
                         .onUserInteraction, //Email Validation as User is typing in box
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 40),
                   TextFormField(
                     controller: _passwordController,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(200.0),
-                        borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 18, 58, 26), width: 2.0),
-                      ),
+                          borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 18, 58, 26), // Green border color
+                            width: 2.0,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(200.0),
+                          borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 18, 58, 26), // Green border color
+                            width: 2.0,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(200.0),
+                          borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 18, 58, 26), // Green border color
+                            width: 2.0,
+                          ),
+                        ),
                       labelText: 'Password',
                     ),
                     validator: (value) {
                       String pattern =
                           r'^(?=.*[a-zA-Z])(?=.*\d).{5,}$'; //5 Chars, 1 Letter, 1 Number
-                      RegExp regex = new RegExp(pattern);
+                      RegExp regex = RegExp(pattern);
                       if (value != null && !regex.hasMatch(value)) {
                         return 'Must Have:\n-At Least 5 Characters\n-At Least 1 Letter\n-At Least 1 Number';
                       } else {
@@ -234,7 +298,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         .onUserInteraction, //Password Validation as User is typing in box
                     obscureText: true,
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 50),
                   Row(
                     children: <Widget>[
                       Expanded(
@@ -257,6 +321,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               }
                             },
                             style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white, backgroundColor: const Color.fromARGB(255,18,58,26),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(200.0),
                               ),
