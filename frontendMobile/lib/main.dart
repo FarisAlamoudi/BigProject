@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:reserve_smart/dbHelper/mongodb.dart';
 import 'package:reserve_smart/reserve.dart';
 import 'sign_up_page.dart'; // Import the SignUpPage
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -10,18 +12,17 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
-   Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     return MaterialApp(
       title: 'ReserveSmart',
       theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white,
-        primaryColor: const Color.fromARGB(255, 18, 58, 26),
-        colorScheme: ColorScheme.fromSwatch().copyWith(
+        colorScheme: ColorScheme.fromSwatch(
+          primarySwatch: Colors.brown,
+        ).copyWith(
           primary: const Color.fromARGB(255, 18, 58, 26),
-          secondary: const Color.fromARGB(255, 18, 58, 26),
         ),
       ),
       home: const LoginPage(),
@@ -30,7 +31,7 @@ class MyApp extends StatelessWidget {
 }
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -47,6 +48,7 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  /* //Old Login Through Mongo Directly
   Future<void> loginVerification(BuildContext context) async {
     var userCollection = MongoDatabase.userCollection;
     //Using MongoDB Package 'Or' operator to check Email or Username with Password
@@ -88,6 +90,56 @@ class _LoginPageState extends State<LoginPage> {
       );
     }
   }
+  */
+
+  Future<void> loginVerification(BuildContext context) async {
+    final response = await http.post(
+      Uri.parse('https://4331booking.com/api/auth/login'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'identifier': _emailController.text,
+        'password': _passwordController.text,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      //If the server returns a 200 OK response, then parse the JSON.
+      var token = jsonDecode(response.body);
+      //Use the token for subsequent API requests
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ReservePage(user: _emailController.text),
+        ),
+      );
+    } else {
+      {
+        print('Response status: ${response.statusCode}');
+        print('Response body: ${response.body}');
+
+        //If the server returns an error response, then throw an exception.
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Login Error'),
+              content: const Text('Invalid Email/Username or Password'),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('OK'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,15 +150,15 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             Container(
               alignment: Alignment.center,
-              padding: const EdgeInsets.all(40.0),
+              padding: const EdgeInsets.all(0.0),
               child: Column(
                 children: [
                   Image.asset(
                     'assets/Logo2.png',
-                    height: 350,
-                    width: 350,
+                    height: 150,
+                    width: 150,
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                   const Text(
                     'Welcome to ReserveSmart!',
                     style: TextStyle(
@@ -119,7 +171,7 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
             ),
-            const SizedBox(height: 0),
+            const SizedBox(height: 45),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -132,25 +184,17 @@ class _LoginPageState extends State<LoginPage> {
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.symmetric(
                             vertical: 15.0, horizontal: 15),
-                        enabledBorder: OutlineInputBorder(
+                        border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(200.0),
                           borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 18, 58, 26),
-                            width: 2.0,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(200.0),
-                          borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 18, 58, 26),
-                            width: 2.0,
-                          ),
+                              color: Color.fromARGB(255, 18, 58, 26),
+                              width: 2.0),
                         ),
                         labelText: 'Email or Username',
                       ),
                     ),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 20),
                   SizedBox(
                     height: 50,
                     child: TextField(
@@ -158,35 +202,23 @@ class _LoginPageState extends State<LoginPage> {
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.symmetric(
                             vertical: 15.0, horizontal: 15),
-                        enabledBorder: OutlineInputBorder(
+                        border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(200.0),
-                          borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 18, 58, 26),
-                            width: 2.0,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(200.0),
-                          borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 18, 58, 26),
-                            width: 2.0,
-                          ),
                         ),
                         labelText: 'Password',
                       ),
                       obscureText: true,
                     ),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 25),
                   SizedBox(
-                    height: 50,
+                    height: 45,
                     child: ElevatedButton(
                       onPressed: () {
                         //Verify Login Credentials
                         loginVerification(context);
                       },
                       style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white, backgroundColor: const Color.fromARGB(255,18,58,26),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(200.0),
                         ),
