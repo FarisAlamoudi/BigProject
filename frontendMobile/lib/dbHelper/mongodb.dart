@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:reserve_smart/dbHelper/constant.dart';
 import 'package:mongo_dart/mongo_dart.dart';
-import 'package:reserve_smart/mongoUsers.dart';
+import 'package:reserve_smart/mongo_users.dart';
 
 class MongoDatabase {
   static var db, userCollection, reserveCollection;
