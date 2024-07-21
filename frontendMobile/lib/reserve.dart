@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:reserve_smart/dbHelper/mongodb.dart';
+import 'package:http/http.dart' as http; 
+import 'package:reserve_smart/dbHelper/mongodb.dart'; 
+import 'package:intl/intl.dart'; 
 import 'date_selector.dart';
 
 class ReservePage extends StatefulWidget {
@@ -24,16 +25,18 @@ class _ReservePageState extends State<ReservePage> {
 
   void fetchReservationsForSelectedDate() {
     setState(() {
-      reservationFuture = userVerification(selectedDate);
+      reservationFuture = fetchReservations(selectedDate);
       reservationFuture!.then((res) {
         setState(() {
           reservations = res;
         });
+      }).catchError((error) {
+        print('Error fetching reservations: $error');
       });
     });
   }
 
-  Future<List<Map<String, dynamic>>> userVerification(DateTime date) async {
+  Future<List<Map<String, dynamic>>> fetchReservations(DateTime date) async {
     var reserveCollection = MongoDatabase.reserveCollection;
     var userCollection = MongoDatabase.userCollection;
 
@@ -62,6 +65,39 @@ class _ReservePageState extends State<ReservePage> {
     return reservations;
   }
 
+  Future<void> signOut() async {
+    try {
+      final response = await http.get(
+        Uri.parse('https://4331booking.com//api/auth/logout'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        // ignore: use_build_context_synchronously
+        Navigator.pushReplacementNamed(context, '/login'); 
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Successfully logged out'),
+            backgroundColor: Colors.green,
+          ),
+          
+        );
+      } else {
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error  out')),
+        );
+      }
+    } catch (e) {
+      print('Error during sign out: $e');
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error logging out')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     List<Map<String, dynamic>> sortedReservations = List.from(reservations);
@@ -73,21 +109,40 @@ class _ReservePageState extends State<ReservePage> {
 
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(130.0),
+        preferredSize: const Size.fromHeight(175.0),
         child: AppBar(
-          backgroundColor: const Color.fromARGB(255, 18, 58, 26),
-          flexibleSpace: const Center(
-            child: Padding(
-              padding: EdgeInsets.only(top: 25.0),
-              child: Text(
-                'Reservations',
-                style: TextStyle(
-                  fontSize: 55,
-                  fontFamily: 'Cairo',
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+          automaticallyImplyLeading: false,
+          backgroundColor: const Color.fromARGB(255, 31, 41, 55),
+          flexibleSpace: Padding(
+            padding: const EdgeInsets.only(top: 80.0, left: 75.0, right: 10.0), 
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Reservations',
+                  style: TextStyle(
+                    fontSize: 55,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
+                ElevatedButton(
+                  onPressed: () {
+                    signOut();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 31, 41, 55),
+                  ),
+                  child: const Text(
+                    'Sign Out',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white, 
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -138,14 +193,46 @@ class _ReservePageState extends State<ReservePage> {
                       ),
                     );
                   } else {
-                    return const SizedBox.shrink();
+                    return ListView.builder(
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (context, index) {
+                        final reservation = snapshot.data![index];
+                        DateTime start = DateTime.parse(reservation['Start'].toString());
+                        DateTime end = DateTime.parse(reservation['End'].toString());
+
+                        String startTime = DateFormat('h:mm a').format(start);
+                        String endTime = DateFormat('h:mm a').format(end);
+
+                        return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: ListTile(
+                            title: Text.rich(
+                              TextSpan(
+                                text: '${reservation["Machine"] ?? "N/A"} Reservation\n',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: 'From $startTime to $endTime',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
                   }
                 } else {
                   return const SizedBox.shrink();
                 }
               },
             ),
-          )
+          ),
         ],
       ),
     );
