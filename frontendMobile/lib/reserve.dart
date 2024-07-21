@@ -109,7 +109,7 @@ class _ReservePageState extends State<ReservePage> {
 
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(175.0),
+        preferredSize: const Size.fromHeight(160.0),
         child: AppBar(
           automaticallyImplyLeading: false,
           backgroundColor: const Color.fromARGB(255, 31, 41, 55),
