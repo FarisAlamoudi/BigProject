@@ -36,6 +36,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginPage(),
+        // Add other routes here
       },
     );
   }
@@ -118,7 +119,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
     Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, 
+      backgroundColor: Colors.white, // Set the background color of the Scaffold to white
       body: Column(
         children: [
           Container(
@@ -214,8 +215,11 @@ class _LoginPageState extends State<LoginPage> {
                     child: const Text(
                       "Don't have an account? Register",
                       style: TextStyle(
-                        fontFamily: 'SpaceMono',
-                      ),
+                          fontSize: 16,
+                          color: Color.fromARGB(255, 31, 41, 55),
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'SpaceMono',
+                        ),
                     ),
                   ),
                   TextButton(
@@ -231,8 +235,11 @@ class _LoginPageState extends State<LoginPage> {
                     child: const Text(
                       "Forget your password? Click here",
                       style: TextStyle(
-                        fontFamily: 'SpaceMono',
-                      ),
+                          fontSize: 16,
+                          color: Color.fromARGB(255, 31, 41, 55),
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'SpaceMono',
+                        ),
                     ),
                   ),
                 ],
