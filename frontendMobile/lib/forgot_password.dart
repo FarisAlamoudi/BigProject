@@ -69,83 +69,109 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            const SizedBox(height: 300),
-            const Text(
-              'Forgot Your Password?',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 45,
-                fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 31, 41, 55),
-              ),
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          Container(
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+            child: Image.asset(
+              'assets/TheLogo.png',
+              height: 250,
+              width: 450,
             ),
-            const SizedBox(height: 10),
-            const Text(
-              'Enter an email address to receive a password reset link.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black54,
-              ),
-            ),
-            const SizedBox(height: 30),
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(200.0),
-                  borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
-                ),
-                labelText: 'Email',
-              ),
-            ),
-            const SizedBox(height: 30),
-            SizedBox(
-              height: 45,
-              child: ElevatedButton(
-                onPressed: () {
-                  sendPasswordResetEmail(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(200.0),
-                  ),
-                  backgroundColor: const Color.fromARGB(255, 31, 41, 55),
-                ),
-                child: const Text(
-                  'Send Email',
-                  style: TextStyle(fontSize: 20, color: Colors.white),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Center(
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const LoginPage(),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Forgot Your Password?',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 38,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'SpaceMono',
+                      color: Color.fromARGB(255, 31, 41, 55),
                     ),
-                  );
-                },
-                child: const Text(
-                  'Already have an account? Log in!',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Color.fromARGB(255, 31, 41, 55),
-                    fontWeight: FontWeight.bold,
                   ),
-                ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Enter your email address to receive a password reset link.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black54,
+                      fontFamily: 'SpaceMono',
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  TextField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                        borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+                      ),
+                      labelText: 'Email',
+                      labelStyle: const TextStyle(
+                        fontFamily: 'SpaceMono',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    height: 45,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        sendPasswordResetEmail(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
+                        backgroundColor: const Color.fromARGB(255, 31, 41, 55),
+                      ),
+                      child: const Text(
+                        'Send Email',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                          fontFamily: 'SpaceMono',
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Center(
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const LoginPage(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        'Already have an account? Log in!',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Color.fromARGB(255, 31, 41, 55),
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'SpaceMono',
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
