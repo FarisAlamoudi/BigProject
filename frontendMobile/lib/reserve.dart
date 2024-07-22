@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http; 
-import 'package:reserve_smart/dbHelper/mongodb.dart'; 
-import 'package:intl/intl.dart'; 
+import 'package:http/http.dart' as http;
+import 'package:reserve_smart/dbHelper/mongodb.dart';
+import 'package:intl/intl.dart';
 import 'date_selector.dart';
 
 class ReservePage extends StatefulWidget {
@@ -74,19 +74,18 @@ class _ReservePageState extends State<ReservePage> {
 
       if (response.statusCode == 200) {
         // ignore: use_build_context_synchronously
-        Navigator.pushReplacementNamed(context, '/login'); 
+        Navigator.pushReplacementNamed(context, '/login');
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Successfully logged out'),
             backgroundColor: Colors.green,
           ),
-          
         );
       } else {
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error  out')),
+          const SnackBar(content: Text('Error logging out')),
         );
       }
     } catch (e) {
@@ -109,40 +108,21 @@ class _ReservePageState extends State<ReservePage> {
 
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(160.0),
+        preferredSize: const Size.fromHeight(130.0), // Specify your desired height here
         child: AppBar(
-          automaticallyImplyLeading: false,
           backgroundColor: const Color.fromARGB(255, 31, 41, 55),
-          flexibleSpace: Padding(
-            padding: const EdgeInsets.only(top: 80.0, left: 75.0, right: 10.0), 
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Reservations',
-                  style: TextStyle(
-                    fontSize: 55,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+          flexibleSpace: const Center(
+            child: Padding(
+              padding: EdgeInsets.only(top: 20.0), // Adjust this value as needed for vertical centering
+              child: Text(
+                'Reservations',
+                style: TextStyle(
+                  fontSize: 50,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'SpaceMono',
+                  color: Colors.white,
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    signOut();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 31, 41, 55),
-                  ),
-                  child: const Text(
-                    'Log Out',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white, 
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -234,6 +214,33 @@ class _ReservePageState extends State<ReservePage> {
             ),
           ),
         ],
+      ),
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.white,
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 8.0,
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: ElevatedButton(
+            onPressed: () {
+              signOut();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromARGB(255, 31, 41, 55),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+            ),
+            child: const Text(
+              'Log Out',
+              style: TextStyle(
+                fontSize: 20,
+                color: Colors.white,
+                fontFamily: 'SpaceMono',
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
