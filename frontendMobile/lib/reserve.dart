@@ -4,6 +4,7 @@ import 'package:reserve_smart/dbHelper/mongodb.dart';
 import 'package:intl/intl.dart';
 import 'date_selector.dart';
 
+
 class ReservePage extends StatefulWidget {
   final String user;
   const ReservePage({super.key, required this.user});
@@ -20,11 +21,6 @@ class _ReservePageState extends State<ReservePage> {
   @override
   void initState() {
     super.initState();
-    initDbAndFetchReservations();
-  }
-
-  void initDbAndFetchReservations() async {
-    await MongoDatabase.connect();
     fetchReservationsForSelectedDate();
   }
 
@@ -42,33 +38,34 @@ class _ReservePageState extends State<ReservePage> {
   }
 
   Future<List<Map<String, dynamic>>> fetchReservations(DateTime date) async {
-    var reserveCollection = MongoDatabase.reserveCollection;
-    var userCollection = MongoDatabase.userCollection;
+  var reserveCollection = MongoDatabase.reserveCollection;
+  var userCollection = MongoDatabase.userCollection;
 
-    bool isEmail = widget.user.contains('@');
-    String username;
+  bool isEmail = widget.user.contains('@');
+  String username;
 
-    if (isEmail) {
-      var userDoc = await userCollection.findOne({'Email': widget.user});
-      if (userDoc != null) {
-        username = userDoc['userName'];
-      } else {
-        return [];
-      }
+  if (isEmail) {
+    var userDoc = await userCollection.findOne({'Email': widget.user});
+    if (userDoc != null) {
+      username = userDoc['UserName'];
     } else {
-      username = widget.user;
+      return [];
     }
-
-    DateTime startOfDay = DateTime(date.year, date.month, date.day, 0, 0, 0);
-    DateTime endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
-
-    var reservations = await reserveCollection.find({
-      'userId': username,
-      'start': {'\$gte': startOfDay, '\$lt': endOfDay}
-    }).toList();
-
-    return reservations;
+  } else {
+    username = widget.user;
   }
+
+  DateTime startOfDay = DateTime(date.year, date.month, date.day, 0, 0, 0);
+  DateTime endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
+
+  var reservations = await reserveCollection.find({
+    'User': username,
+    'Start': {'\$gte': startOfDay, '\$lt': endOfDay}
+  }).toList();
+
+  return reservations;
+}
+
 
   Future<void> signOut() async {
     try {
@@ -90,7 +87,7 @@ class _ReservePageState extends State<ReservePage> {
       } else {
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error  out')),
+          const SnackBar(content: Text('Error logging out')),
         );
       }
     } catch (e) {
@@ -106,57 +103,33 @@ class _ReservePageState extends State<ReservePage> {
   Widget build(BuildContext context) {
     List<Map<String, dynamic>> sortedReservations = List.from(reservations);
     sortedReservations.sort((a, b) {
-      DateTime startA =
-          DateTime.tryParse(a['Start'].toString()) ?? DateTime.now();
-      DateTime startB =
-          DateTime.tryParse(b['Start'].toString()) ?? DateTime.now();
+      DateTime startA = DateTime.tryParse(a['Start'].toString()) ?? DateTime.now();
+      DateTime startB = DateTime.tryParse(b['Start'].toString()) ?? DateTime.now();
       return startA.compareTo(startB);
     });
 
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(160.0),
+        preferredSize: const Size.fromHeight(130.0), // Specify your desired height here
         child: AppBar(
-          automaticallyImplyLeading: false,
           backgroundColor: const Color.fromARGB(255, 31, 41, 55),
-          flexibleSpace: Padding(
-            padding: const EdgeInsets.only(top: 80.0, left: 10.0),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Reservations',
-                    style: TextStyle(
-                      fontSize: 55,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      signOut();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 31, 41, 55),
-                    ),
-                    child: const Text(
-                      'Sign Out',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
+          flexibleSpace: const Center(
+            child: Padding(
+              padding: EdgeInsets.only(top: 20.0), // Adjust this value as needed for vertical centering
+              child: Text(
+                'Reservations',
+                style: TextStyle(
+                  fontSize: 50,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'SpaceMono',
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
         ),
       ),
-      body: ListView(
+      body: Column(
         children: [
           WeekDaysSelector(
             onDateSelected: (date) {
@@ -183,10 +156,10 @@ class _ReservePageState extends State<ReservePage> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.only(top: 50.0),
+                            padding: const EdgeInsets.only(top: 125.0),
                             child: Image.asset(
                               'assets/SleepingBrain.png',
-                              height: 205,
+                              height: 275,
                             ),
                           ),
                           const SizedBox(height: 0),
@@ -206,10 +179,8 @@ class _ReservePageState extends State<ReservePage> {
                       itemCount: snapshot.data!.length,
                       itemBuilder: (context, index) {
                         final reservation = snapshot.data![index];
-                        DateTime start =
-                            DateTime.parse(reservation['Start'].toString());
-                        DateTime end =
-                            DateTime.parse(reservation['End'].toString());
+                        DateTime start = DateTime.parse(reservation['Start'].toString());
+                        DateTime end = DateTime.parse(reservation['End'].toString());
 
                         String startTime = DateFormat('h:mm a').format(start);
                         String endTime = DateFormat('h:mm a').format(end);
@@ -219,8 +190,7 @@ class _ReservePageState extends State<ReservePage> {
                           child: ListTile(
                             title: Text.rich(
                               TextSpan(
-                                text:
-                                    '${reservation["Machine"] ?? "N/A"} Reservation\n',
+                                text: '${reservation["Machine"] ?? "N/A"} Reservation\n',
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -246,6 +216,33 @@ class _ReservePageState extends State<ReservePage> {
             ),
           ),
         ],
+      ),
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.white,
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 8.0,
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: ElevatedButton(
+            onPressed: () {
+              signOut();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromARGB(255, 31, 41, 55),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+            ),
+            child: const Text(
+              'Log Out',
+              style: TextStyle(
+                fontSize: 20,
+                color: Colors.white,
+                fontFamily: 'SpaceMono',
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
