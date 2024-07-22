@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:reserve_smart/main.dart'; 
+import 'package:reserve_smart/main.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -16,7 +16,8 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _passwordVerificationController = TextEditingController();
+  final TextEditingController _passwordVerificationController =
+      TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -71,7 +72,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   child: const Text('OK'),
                   onPressed: () {
                     Navigator.of(context).pop();
-                    Navigator.pushNamed(context, '/login');
+                    Navigator.pushNamed(context, '/');
                   },
                 ),
               ],
@@ -105,7 +106,8 @@ class _SignUpPageState extends State<SignUpPage> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Text('Sign Up Error'),
-            content: const Text('Failed to connect to the server. Please try again later.'),
+            content: const Text(
+                'Failed to connect to the server. Please try again later.'),
             actions: <Widget>[
               TextButton(
                 child: const Text('OK'),
@@ -152,7 +154,9 @@ class _SignUpPageState extends State<SignUpPage> {
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(200.0),
-                          borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+                          borderSide: const BorderSide(
+                              color: Color.fromARGB(255, 31, 41, 55),
+                              width: 2.0),
                         ),
                         labelText: 'First Name',
                       ),
@@ -170,7 +174,9 @@ class _SignUpPageState extends State<SignUpPage> {
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(200.0),
-                          borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+                          borderSide: const BorderSide(
+                              color: Color.fromARGB(255, 31, 41, 55),
+                              width: 2.0),
                         ),
                         labelText: 'Last Name',
                       ),
@@ -188,7 +194,9 @@ class _SignUpPageState extends State<SignUpPage> {
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(200.0),
-                          borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+                          borderSide: const BorderSide(
+                              color: Color.fromARGB(255, 31, 41, 55),
+                              width: 2.0),
                         ),
                         labelText: 'Username',
                         helperText: 'Must be 5 characters long',
@@ -210,7 +218,9 @@ class _SignUpPageState extends State<SignUpPage> {
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(200.0),
-                          borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+                          borderSide: const BorderSide(
+                              color: Color.fromARGB(255, 31, 41, 55),
+                              width: 2.0),
                         ),
                         labelText: 'Email',
                       ),
@@ -228,10 +238,13 @@ class _SignUpPageState extends State<SignUpPage> {
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(200.0),
-                          borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+                          borderSide: const BorderSide(
+                              color: Color.fromARGB(255, 31, 41, 55),
+                              width: 2.0),
                         ),
                         labelText: 'Password',
-                        helperText: 'Must be 8 characters long and contain a number',
+                        helperText:
+                            'Must be 8 characters long and contain a number',
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -254,7 +267,9 @@ class _SignUpPageState extends State<SignUpPage> {
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(200.0),
-                          borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+                          borderSide: const BorderSide(
+                              color: Color.fromARGB(255, 31, 41, 55),
+                              width: 2.0),
                         ),
                         labelText: 'Verify Password',
                       ),
@@ -294,7 +309,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const LoginPage()),
+                          MaterialPageRoute(
+                              builder: (context) => const LoginPage()),
                         );
                       },
                       child: const Text(

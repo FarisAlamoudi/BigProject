@@ -15,6 +15,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('Building ForgotPasswordPage');
     return MaterialApp(
       title: '4331Booking',
       theme: ThemeData(
@@ -28,10 +29,13 @@ class MyApp extends StatelessWidget {
           foregroundColor: Color.fromARGB(255, 31, 41, 55),
         ),
         inputDecorationTheme: InputDecorationTheme(
-          labelStyle: const TextStyle(color: Color.fromARGB(255, 31, 41, 55),),
+          labelStyle: const TextStyle(
+            color: Color.fromARGB(255, 31, 41, 55),
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(200.0),
-            borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+            borderSide: const BorderSide(
+                color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
           ),
         ),
       ),
@@ -93,8 +97,8 @@ class _LoginPageState extends State<LoginPage> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: const Text('Login Error'),
-              content: Text(jsonResponse['message'] ?? 'Unknown error'),
+              title: const Text('Invalid Credentials'),
+              content: Text(jsonResponse['message'] ?? 'Incorrect Entry'),
               actions: <Widget>[
                 TextButton(
                   child: const Text('OK'),
@@ -114,7 +118,8 @@ class _LoginPageState extends State<LoginPage> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Text('Login Error'),
-            content: const Text('Failed to connect to the server. Please try again later.'),
+            content: const Text(
+                'Failed to connect to the server. Please try again later.'),
             actions: <Widget>[
               TextButton(
                 child: const Text('OK'),
@@ -132,106 +137,114 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Container(
-            alignment: Alignment.center,
-            padding: const EdgeInsets.all(16.0),
-            child: Image.asset(
-              'assets/TheLogo.png',
-              height: 450,
-              width: 450,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.all(16.0),
+              child: Image.asset(
+                'assets/TheLogo.png',
+                height: 350,
+                width: 450,
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                SizedBox(
-                  height: 60,
-                  child: TextField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(200.0),
-                        borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  SizedBox(
+                    height: 60,
+                    child: TextField(
+                      controller: _emailController,
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 15.0, horizontal: 15),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(200.0),
+                          borderSide: const BorderSide(
+                              color: Color.fromARGB(255, 31, 41, 55),
+                              width: 2.0),
+                        ),
+                        labelText: 'Email or Username',
                       ),
-                      labelText: 'Email or Username',
                     ),
                   ),
-                ),
-                const SizedBox(height: 20), // Adjust spacing here
-                SizedBox(
-                  height: 50,
-                  child: TextField(
-                    controller: _passwordController,
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(200.0),
+                  const SizedBox(height: 20), // Adjust spacing here
+                  SizedBox(
+                    height: 50,
+                    child: TextField(
+                      controller: _passwordController,
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 15.0, horizontal: 15),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(200.0),
+                        ),
+                        labelText: 'Password',
                       ),
-                      labelText: 'Password',
+                      obscureText: true,
                     ),
-                    obscureText: true,
                   ),
-                ),
-                const SizedBox(height: 30),
-                SizedBox(
-                  height: 45,
-                  child: ElevatedButton(
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    height: 45,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        loginVerification(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(200.0),
+                        ),
+                        backgroundColor: const Color.fromARGB(255, 31, 41, 55),
+                      ),
+                      child: const Text(
+                        'Login',
+                        style: TextStyle(fontSize: 20, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextButton(
                     onPressed: () {
-                      loginVerification(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ForgotPasswordPage()),
+                      );
                     },
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(200.0),
-                      ),
-                      backgroundColor: const Color.fromARGB(255, 31, 41, 55),
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color.fromARGB(255, 31, 41, 55),
                     ),
                     child: const Text(
-                      'Login',
-                      style: TextStyle(fontSize: 20, color: Colors.white),
+                      "Forget your password?",
+                      style: TextStyle(color: Color.fromARGB(255, 31, 41, 55)),
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),
-                    );
-                  },
-                  style: TextButton.styleFrom(
-                    foregroundColor: const Color.fromARGB(255, 31, 41, 55),
-                  ),
-                  child: const Text(
-                    "Forget your password?",
-                    style: TextStyle(color: Color.fromARGB(255, 31, 41, 55)),
-                  ),
-                ),
 
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const SignUpPage()),
-                    );
-                  },
-                  child: const Text(
-                        'Don\'t have an account? Sign Up!',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 31, 41, 55),
-                          fontSize: 15, // Adjust the font size here
-                        ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const SignUpPage()),
+                      );
+                    },
+                    child: const Text(
+                      'Don\'t have an account? Sign Up!',
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 31, 41, 55),
+                        fontSize: 15, // Adjust the font size here
                       ),
-                ),
-              ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
