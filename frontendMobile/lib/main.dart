@@ -36,7 +36,6 @@ class MyApp extends StatelessWidget {
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginPage(),
-        // Add other routes here
       },
     );
   }
@@ -117,104 +116,127 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+    Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white, 
       body: Column(
         children: [
           Container(
             alignment: Alignment.center,
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
             child: Image.asset(
               'assets/TheLogo.png',
-              height: 450,
+              height: 250,
               width: 450,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                SizedBox(
-                  height: 60,
-                  child: TextField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(200.0),
-                        borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Center(
+                    child: Text(
+                      'Welcome Back!',
+                      style: TextStyle(
+                        fontSize: 42,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'SpaceMono',
+                        color: Color.fromARGB(255, 31, 41, 55),
                       ),
-                      labelText: 'Email or Username',
                     ),
                   ),
-                ),
-                const SizedBox(height: 20), // Adjust spacing here
-                SizedBox(
-                  height: 50,
-                  child: TextField(
-                    controller: _passwordController,
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(200.0),
+                  const SizedBox(height: 55),
+                  SizedBox(
+                    height: 60,
+                    child: TextField(
+                      controller: _emailController,
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                          borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+                        ),
+                        labelText: 'Username',
                       ),
-                      labelText: 'Password',
                     ),
-                    obscureText: true,
                   ),
-                ),
-                const SizedBox(height: 30),
-                SizedBox(
-                  height: 45,
-                  child: ElevatedButton(
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    height: 60,
+                    child: TextField(
+                      controller: _passwordController,
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
+                        labelText: 'Password',
+                      ),
+                      obscureText: true,
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    height: 45,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        loginVerification(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
+                        backgroundColor: const Color.fromARGB(255, 31, 41, 55),
+                      ),
+                      child: const Text(
+                        'Login',
+                        style: TextStyle(
+                          fontSize: 20, 
+                          color: Colors.white,
+                          fontFamily: 'SpaceMono',
+                        ),   
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  TextButton(
                     onPressed: () {
-                      loginVerification(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SignUpPage()),
+                      );
                     },
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(200.0),
-                      ),
-                      backgroundColor: const Color.fromARGB(255, 31, 41, 55),
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color.fromARGB(255, 31, 41, 55),
                     ),
                     child: const Text(
-                      'Login',
-                      style: TextStyle(fontSize: 20, color: Colors.white),
+                      "Don't have an account? Register",
+                      style: TextStyle(
+                        fontFamily: 'SpaceMono',
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),
-                    );
-                  },
-                  style: TextButton.styleFrom(
-                    foregroundColor: const Color.fromARGB(255, 31, 41, 55),
-                  ),
-                  child: const Text(
-                    "Forget your password?",
-                    style: TextStyle(color: Color.fromARGB(255, 31, 41, 55)),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const SignUpPage()),
-                    );
-                  },
-                  child: const Text(
-                    'Don\'t have an account? Sign Up!',
-                    style: TextStyle(
-                      color: Color.fromARGB(255, 31, 41, 55),
-                      fontSize: 15, // Adjust the font size here
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),
+                      );
+                    },
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color.fromARGB(255, 31, 41, 55),
+                    ),
+                    child: const Text(
+                      "Forget your password? Click here",
+                      style: TextStyle(
+                        fontFamily: 'SpaceMono',
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
