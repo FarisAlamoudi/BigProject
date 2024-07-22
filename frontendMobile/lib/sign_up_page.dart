@@ -293,7 +293,9 @@ class _SignUpPageState extends State<SignUpPage> {
                             child: const Text(
                               'Already have an account? Login!',
                               style: TextStyle(
-                                fontSize: 15,
+                                fontSize: 16,
+                                color: Color.fromARGB(255, 31, 41, 55),
+                                fontWeight: FontWeight.bold,
                                 fontFamily: 'SpaceMono',
                               ),
                             ),
