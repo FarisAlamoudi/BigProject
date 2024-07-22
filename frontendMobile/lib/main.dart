@@ -1,21 +1,23 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:reserve_smart/dbHelper/mongodb.dart';
 import 'package:reserve_smart/forgot_password.dart';
 import 'package:reserve_smart/reserve.dart';
 import 'package:reserve_smart/sign_up_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await MongoDatabase.connect(); 
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    print('Building ForgotPasswordPage');
     return MaterialApp(
       title: '4331Booking',
       theme: ThemeData(
@@ -23,23 +25,22 @@ class MyApp extends StatelessWidget {
           seedColor: const Color.fromARGB(255, 31, 41, 55),
           primary: Colors.black,
         ),
-        //scaffoldBackgroundColor: Colors.white,
         appBarTheme: const AppBarTheme(
-          //backgroundColor: Colors.white,
           foregroundColor: Color.fromARGB(255, 31, 41, 55),
         ),
         inputDecorationTheme: InputDecorationTheme(
-          labelStyle: const TextStyle(
-            color: Color.fromARGB(255, 31, 41, 55),
-          ),
+          labelStyle: const TextStyle(color: Color.fromARGB(255, 31, 41, 55)),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(200.0),
-            borderSide: const BorderSide(
-                color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+            borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
           ),
         ),
       ),
-      home: const LoginPage(),
+      initialRoute: '/login',
+      routes: {
+        '/login': (context) => const LoginPage(),
+        // Add other routes here
+      },
     );
   }
 }
@@ -83,6 +84,13 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Login successful!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -93,94 +101,80 @@ class _LoginPageState extends State<LoginPage> {
         );
       } else {
         final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('Invalid Credentials'),
-              content: Text(jsonResponse['message'] ?? 'Incorrect Entry'),
-              actions: <Widget>[
-                TextButton(
-                  child: const Text('OK'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            );
-          },
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(jsonResponse['message'] ?? 'Unknown error'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } catch (e) {
       print(e.toString());
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Login Error'),
-            content: const Text(
-                'Failed to connect to the server. Please try again later.'),
-            actions: <Widget>[
-              TextButton(
-                child: const Text('OK'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to connect to the server. Please try again later.'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
 
   @override
-  Widget build(BuildContext context) {
+    Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
-              alignment: Alignment.center,
-              padding: const EdgeInsets.all(16.0),
-              child: Image.asset(
-                'assets/TheLogo.png',
-                height: 350,
-                width: 450,
-              ),
+      backgroundColor: Colors.white, // Set the background color of the Scaffold to white
+      body: Column(
+        children: [
+          Container(
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+            child: Image.asset(
+              'assets/TheLogo.png',
+              height: 250,
+              width: 450,
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          ),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
+                children: [
+                  const Center(
+                    child: Text(
+                      'Welcome Back!',
+                      style: TextStyle(
+                        fontSize: 42,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'SpaceMono',
+                        color: Color.fromARGB(255, 31, 41, 55),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 55),
                   SizedBox(
                     height: 60,
                     child: TextField(
                       controller: _emailController,
                       decoration: InputDecoration(
-                        contentPadding: const EdgeInsets.symmetric(
-                            vertical: 15.0, horizontal: 15),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(200.0),
-                          borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 31, 41, 55),
-                              width: 2.0),
+                          borderRadius: BorderRadius.circular(5.0),
+                          borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
                         ),
-                        labelText: 'Email or Username',
+                        labelText: 'Username',
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20), // Adjust spacing here
+                  const SizedBox(height: 30),
                   SizedBox(
-                    height: 50,
+                    height: 60,
                     child: TextField(
                       controller: _passwordController,
                       decoration: InputDecoration(
-                        contentPadding: const EdgeInsets.symmetric(
-                            vertical: 15.0, horizontal: 15),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(200.0),
+                          borderRadius: BorderRadius.circular(5.0),
                         ),
                         labelText: 'Password',
                       ),
@@ -196,55 +190,66 @@ class _LoginPageState extends State<LoginPage> {
                       },
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(200.0),
+                          borderRadius: BorderRadius.circular(5.0),
                         ),
                         backgroundColor: const Color.fromARGB(255, 31, 41, 55),
                       ),
                       child: const Text(
                         'Login',
-                        style: TextStyle(fontSize: 20, color: Colors.white),
+                        style: TextStyle(
+                          fontSize: 20, 
+                          color: Colors.white,
+                          fontFamily: 'SpaceMono',
+                        ),   
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 15),
                   TextButton(
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => ForgotPasswordPage()),
+                        MaterialPageRoute(builder: (context) => const SignUpPage()),
                       );
                     },
                     style: TextButton.styleFrom(
                       foregroundColor: const Color.fromARGB(255, 31, 41, 55),
                     ),
                     child: const Text(
-                      "Forget your password?",
-                      style: TextStyle(color: Color.fromARGB(255, 31, 41, 55)),
+                      "Don't have an account? Register",
+                      style: TextStyle(
+                          fontSize: 16,
+                          color: Color.fromARGB(255, 31, 41, 55),
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'SpaceMono',
+                        ),
                     ),
                   ),
-
                   TextButton(
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => const SignUpPage()),
+                        MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),
                       );
                     },
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color.fromARGB(255, 31, 41, 55),
+                    ),
                     child: const Text(
-                      'Don\'t have an account? Sign Up!',
+                      "Forget your password? Click here",
                       style: TextStyle(
-                        color: Color.fromARGB(255, 31, 41, 55),
-                        fontSize: 15, // Adjust the font size here
-                      ),
+                          fontSize: 16,
+                          color: Color.fromARGB(255, 31, 41, 55),
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'SpaceMono',
+                        ),
                     ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
