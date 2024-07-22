@@ -47,7 +47,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             content: Text('Password reset email sent successfully.'),
           ),
         );
-        _emailController.clear();
+        _emailController.clear(); // Clear the text field after successful submission
       } else {
         final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
         ScaffoldMessenger.of(context).showSnackBar(
