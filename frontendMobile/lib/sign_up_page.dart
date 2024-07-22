@@ -60,62 +60,29 @@ class _SignUpPageState extends State<SignUpPage> {
 
       if (response.statusCode == 201) {
         final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('Sign Up Successful'),
-              content: Text(jsonResponse['message']),
-              actions: <Widget>[
-                TextButton(
-                  child: const Text('OK'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    Navigator.pushNamed(context, '/login');
-                  },
-                ),
-              ],
-            );
-          },
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(jsonResponse['message']),
+            backgroundColor: Colors.green,
+          ),
         );
+        Navigator.pushNamed(context, '/login');
       } else {
         final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('Sign Up Error'),
-              content: Text(jsonResponse['message'] ?? 'Unknown error'),
-              actions: <Widget>[
-                TextButton(
-                  child: const Text('OK'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            );
-          },
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(jsonResponse['message'] ?? 'Unknown error'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } catch (e) {
       print(e.toString());
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Sign Up Error'),
-            content: const Text('Failed to connect to the server. Please try again later.'),
-            actions: <Widget>[
-              TextButton(
-                child: const Text('OK'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to connect to the server. Please try again later.'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -123,194 +90,223 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Container(
-              alignment: Alignment.center,
-              padding: const EdgeInsets.symmetric(vertical: 20.0),
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          Container(
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+            child: Image.asset(
+              'assets/TheLogo.png',
+              height: 250,
+              width: 450,
             ),
-            Expanded(
-              child: Form(
-                key: _formKey,
-                child: ListView(
-                  children: <Widget>[
-                    const SizedBox(height: 100),
-                    const Text(
+          ),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Center(
+                    child: Text(
                       'Create Your Account',
                       style: TextStyle(
-                        fontSize: 50,
+                        fontSize: 42,
                         fontWeight: FontWeight.bold,
+                        fontFamily: 'SpaceMono',
                         color: Color.fromARGB(255, 31, 41, 55),
                       ),
-                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 30),
-                    TextFormField(
-                      controller: _firstNameController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(200.0),
-                          borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
-                        ),
-                        labelText: 'First Name',
+                  ),
+                  const SizedBox(height: 15),
+                  Expanded(
+                    child: Form(
+                      key: _formKey,
+                      child: ListView(
+                        children: [
+                          TextFormField(
+                            controller: _firstNameController,
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5.0),
+                                borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+                              ),
+                              labelText: 'First Name',
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please Enter First Name';
+                              }
+                              return null;
+                            },
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                          ),
+                          const SizedBox(height: 20),
+                          TextFormField(
+                            controller: _lastNameController,
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5.0),
+                                borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+                              ),
+                              labelText: 'Last Name',
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please Enter Last Name';
+                              }
+                              return null;
+                            },
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                          ),
+                          const SizedBox(height: 20),
+                          TextFormField(
+                            controller: _usernameController,
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5.0),
+                                borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+                              ),
+                              labelText: 'Username',
+                              helperText: 'Must be 5 characters long',
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please Enter a Username';
+                              }
+                              if (value.length < 5) {
+                                return 'Username must be at least 5 characters long';
+                              }
+                              return null;
+                            },
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                          ),
+                          const SizedBox(height: 20),
+                          TextFormField(
+                            controller: _emailController,
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5.0),
+                                borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+                              ),
+                              labelText: 'Email',
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please Enter an Email';
+                              }
+                              return null;
+                            },
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                          ),
+                          const SizedBox(height: 20),
+                          TextFormField(
+                            controller: _passwordController,
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5.0),
+                                borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+                              ),
+                              labelText: 'Password',
+                              helperText: 'Must be 8 characters long and contain a number',
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please Enter a Password';
+                              }
+                              if (value.length < 8) {
+                                return 'Password must be at least 8 characters long';
+                              }
+                              if (!RegExp(r'\d').hasMatch(value)) {
+                                return 'Password must contain a number';
+                              }
+                              return null;
+                            },
+                            obscureText: true,
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                          ),
+                          const SizedBox(height: 20),
+                          TextFormField(
+                            controller: _passwordVerificationController,
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5.0),
+                                borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+                              ),
+                              labelText: 'Verify Password',
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please Verify Your Password';
+                              }
+                              if (value != _passwordController.text) {
+                                return 'Passwords do not match';
+                              }
+                              return null;
+                            },
+                            obscureText: true,
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                          ),
+                          const SizedBox(height: 30),
+                          ElevatedButton(
+                            onPressed: () {
+                              if (_formKey.currentState?.validate() ?? false) {
+                                signUp(context);
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color.fromARGB(255, 31, 41, 55),
+                              padding: const EdgeInsets.symmetric(vertical: 15.0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5.0),
+                              ),
+                              textStyle: const TextStyle(
+                                fontSize: 20,
+                                fontFamily: 'SpaceMono',
+                              ),
+                            ),
+                            child: const Text(
+                              'Sign Up',
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const LoginPage()),
+                              );
+                            },
+                            style: TextButton.styleFrom(
+                              foregroundColor: const Color.fromARGB(255, 31, 41, 55),
+                            ),
+                            child: const Text(
+                              'Already have an account? Login!',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontFamily: 'SpaceMono',
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please Enter First Name';
-                        }
-                        return null;
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
                     ),
-                    const SizedBox(height: 30),
-                    TextFormField(
-                      controller: _lastNameController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(200.0),
-                          borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
-                        ),
-                        labelText: 'Last Name',
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please Enter Last Name';
-                        }
-                        return null;
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                    ),
-                    const SizedBox(height: 30),
-                    TextFormField(
-                      controller: _usernameController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(200.0),
-                          borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
-                        ),
-                        labelText: 'Username',
-                        helperText: 'Must be 5 characters long',
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please Enter a Username';
-                        }
-                        if (value.length < 5) {
-                          return 'Username must be at least 5 characters long';
-                        }
-                        return null;
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                    ),
-                    const SizedBox(height: 30),
-                    TextFormField(
-                      controller: _emailController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(200.0),
-                          borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
-                        ),
-                        labelText: 'Email',
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please Enter an Email';
-                        }
-                        return null;
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                    ),
-                    const SizedBox(height: 30),
-                    TextFormField(
-                      controller: _passwordController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(200.0),
-                          borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
-                        ),
-                        labelText: 'Password',
-                        helperText: 'Must be 8 characters long and contain a number',
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please Enter a Password';
-                        }
-                        if (value.length < 8) {
-                          return 'Password must be at least 8 characters long';
-                        }
-                        if (!RegExp(r'\d').hasMatch(value)) {
-                          return 'Password must contain a number';
-                        }
-                        return null;
-                      },
-                      obscureText: true,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                    ),
-                    const SizedBox(height: 30),
-                    TextFormField(
-                      controller: _passwordVerificationController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(200.0),
-                          borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
-                        ),
-                        labelText: 'Verify Password',
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please Verify Your Password';
-                        }
-                        if (value != _passwordController.text) {
-                          return 'Passwords do not match';
-                        }
-                        return null;
-                      },
-                      obscureText: true,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                    ),
-                    const SizedBox(height: 30),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          signUp(context);
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(200.0),
-                        ),
-                        backgroundColor: const Color.fromARGB(255, 31, 41, 55),
-                        minimumSize: const Size(double.infinity, 50),
-                      ),
-                      child: const Text(
-                        'Sign Up',
-                        style: TextStyle(fontSize: 20, color: Colors.white),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const LoginPage()),
-                        );
-                      },
-                      child: const Text(
-                        'Already have an account? Login!',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 31, 41, 55),
-                          fontSize: 15, // Adjust the font size here
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
