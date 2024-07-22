@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http; 
-import 'package:reserve_smart/dbHelper/mongodb.dart'; 
-import 'package:intl/intl.dart'; 
+import 'package:http/http.dart' as http;
+import 'package:reserve_smart/dbHelper/mongodb.dart';
+import 'package:intl/intl.dart';
 import 'date_selector.dart';
 
 class ReservePage extends StatefulWidget {
@@ -20,6 +20,11 @@ class _ReservePageState extends State<ReservePage> {
   @override
   void initState() {
     super.initState();
+    initDbAndFetchReservations();
+  }
+
+  void initDbAndFetchReservations() async {
+    await MongoDatabase.connect();
     fetchReservationsForSelectedDate();
   }
 
@@ -46,7 +51,7 @@ class _ReservePageState extends State<ReservePage> {
     if (isEmail) {
       var userDoc = await userCollection.findOne({'Email': widget.user});
       if (userDoc != null) {
-        username = userDoc['UserName'];
+        username = userDoc['userName'];
       } else {
         return [];
       }
@@ -58,8 +63,8 @@ class _ReservePageState extends State<ReservePage> {
     DateTime endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
 
     var reservations = await reserveCollection.find({
-      'User': username,
-      'Start': {'\$gte': startOfDay, '\$lt': endOfDay}
+      'userId': username,
+      'start': {'\$gte': startOfDay, '\$lt': endOfDay}
     }).toList();
 
     return reservations;
@@ -74,14 +79,13 @@ class _ReservePageState extends State<ReservePage> {
 
       if (response.statusCode == 200) {
         // ignore: use_build_context_synchronously
-        Navigator.pushReplacementNamed(context, '/login'); 
+        Navigator.pushReplacementNamed(context, '/login');
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Successfully logged out'),
             backgroundColor: Colors.green,
           ),
-          
         );
       } else {
         // ignore: use_build_context_synchronously
@@ -102,8 +106,10 @@ class _ReservePageState extends State<ReservePage> {
   Widget build(BuildContext context) {
     List<Map<String, dynamic>> sortedReservations = List.from(reservations);
     sortedReservations.sort((a, b) {
-      DateTime startA = DateTime.tryParse(a['Start'].toString()) ?? DateTime.now();
-      DateTime startB = DateTime.tryParse(b['Start'].toString()) ?? DateTime.now();
+      DateTime startA =
+          DateTime.tryParse(a['Start'].toString()) ?? DateTime.now();
+      DateTime startB =
+          DateTime.tryParse(b['Start'].toString()) ?? DateTime.now();
       return startA.compareTo(startB);
     });
 
@@ -114,40 +120,43 @@ class _ReservePageState extends State<ReservePage> {
           automaticallyImplyLeading: false,
           backgroundColor: const Color.fromARGB(255, 31, 41, 55),
           flexibleSpace: Padding(
-            padding: const EdgeInsets.only(top: 80.0, left: 75.0, right: 10.0), 
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Reservations',
-                  style: TextStyle(
-                    fontSize: 55,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    signOut();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 31, 41, 55),
-                  ),
-                  child: const Text(
-                    'Sign Out',
+            padding: const EdgeInsets.only(top: 80.0, left: 10.0),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Reservations',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 55,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white, 
+                      color: Colors.white,
                     ),
                   ),
-                ),
-              ],
+                  ElevatedButton(
+                    onPressed: () {
+                      signOut();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 31, 41, 55),
+                    ),
+                    child: const Text(
+                      'Sign Out',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ),
-      body: Column(
+      body: ListView(
         children: [
           WeekDaysSelector(
             onDateSelected: (date) {
@@ -174,10 +183,10 @@ class _ReservePageState extends State<ReservePage> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.only(top: 125.0),
+                            padding: const EdgeInsets.only(top: 50.0),
                             child: Image.asset(
                               'assets/SleepingBrain.png',
-                              height: 275,
+                              height: 205,
                             ),
                           ),
                           const SizedBox(height: 0),
@@ -197,8 +206,10 @@ class _ReservePageState extends State<ReservePage> {
                       itemCount: snapshot.data!.length,
                       itemBuilder: (context, index) {
                         final reservation = snapshot.data![index];
-                        DateTime start = DateTime.parse(reservation['Start'].toString());
-                        DateTime end = DateTime.parse(reservation['End'].toString());
+                        DateTime start =
+                            DateTime.parse(reservation['Start'].toString());
+                        DateTime end =
+                            DateTime.parse(reservation['End'].toString());
 
                         String startTime = DateFormat('h:mm a').format(start);
                         String endTime = DateFormat('h:mm a').format(end);
@@ -208,7 +219,8 @@ class _ReservePageState extends State<ReservePage> {
                           child: ListTile(
                             title: Text.rich(
                               TextSpan(
-                                text: '${reservation["Machine"] ?? "N/A"} Reservation\n',
+                                text:
+                                    '${reservation["Machine"] ?? "N/A"} Reservation\n',
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),

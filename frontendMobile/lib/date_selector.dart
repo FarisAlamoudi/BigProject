@@ -115,8 +115,8 @@ class _WeekDaysSelectorState extends State<WeekDaysSelector> {
                               color: selectedDate ==
                                       currentWeekStart
                                           .add(Duration(days: index))
-                                  ? const Color.fromARGB(255, 88, 149, 235)
-                                  : const Color.fromARGB(255, 18, 58, 26),
+                                  ? const Color.fromARGB(255, 255, 125, 40)
+                                  : const Color.fromARGB(255, 31, 41, 55),
                               shape: BoxShape.circle,
                             ),
                             child: Center(
