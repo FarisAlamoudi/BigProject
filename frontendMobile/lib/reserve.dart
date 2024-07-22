@@ -134,7 +134,7 @@ class _ReservePageState extends State<ReservePage> {
                     backgroundColor: const Color.fromARGB(255, 31, 41, 55),
                   ),
                   child: const Text(
-                    'Sign Out',
+                    'Log Out',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
