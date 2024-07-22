@@ -22,20 +22,22 @@ class MyApp extends StatelessWidget {
           seedColor: const Color.fromARGB(255, 31, 41, 55),
           primary: Colors.black,
         ),
-        //scaffoldBackgroundColor: Colors.white,
         appBarTheme: const AppBarTheme(
-          //backgroundColor: Colors.white,
           foregroundColor: Color.fromARGB(255, 31, 41, 55),
         ),
         inputDecorationTheme: InputDecorationTheme(
-          labelStyle: const TextStyle(color: Color.fromARGB(255, 31, 41, 55),),
+          labelStyle: const TextStyle(color: Color.fromARGB(255, 31, 41, 55)),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(200.0),
             borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
           ),
         ),
       ),
-      home: const LoginPage(),
+      initialRoute: '/login',
+      routes: {
+        '/login': (context) => const LoginPage(),
+        // Add other routes here
+      },
     );
   }
 }
@@ -79,6 +81,13 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Login successful!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -89,42 +98,20 @@ class _LoginPageState extends State<LoginPage> {
         );
       } else {
         final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('Login Error'),
-              content: Text(jsonResponse['message'] ?? 'Unknown error'),
-              actions: <Widget>[
-                TextButton(
-                  child: const Text('OK'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            );
-          },
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(jsonResponse['message'] ?? 'Unknown error'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } catch (e) {
       print(e.toString());
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Login Error'),
-            content: const Text('Failed to connect to the server. Please try again later.'),
-            actions: <Widget>[
-              TextButton(
-                child: const Text('OK'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to connect to the server. Please try again later.'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -212,7 +199,6 @@ class _LoginPageState extends State<LoginPage> {
                     style: TextStyle(color: Color.fromARGB(255, 31, 41, 55)),
                   ),
                 ),
-
                 TextButton(
                   onPressed: () {
                     Navigator.push(
@@ -221,12 +207,12 @@ class _LoginPageState extends State<LoginPage> {
                     );
                   },
                   child: const Text(
-                        'Don\'t have an account? Sign Up!',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 31, 41, 55),
-                          fontSize: 15, // Adjust the font size here
-                        ),
-                      ),
+                    'Don\'t have an account? Sign Up!',
+                    style: TextStyle(
+                      color: Color.fromARGB(255, 31, 41, 55),
+                      fontSize: 15, // Adjust the font size here
+                    ),
+                  ),
                 ),
               ],
             ),
