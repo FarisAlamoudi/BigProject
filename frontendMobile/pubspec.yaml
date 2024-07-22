@@ -32,7 +32,6 @@ dependencies:
     sdk: flutter
   intl: ^0.17.0
   http: ^1.2.2
-
   #reserve_smart:
   #  path: ../reserve_smart
 
@@ -49,6 +48,9 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  test: any
+  mockito: ^5.4.4
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
