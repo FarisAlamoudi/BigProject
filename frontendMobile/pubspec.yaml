@@ -82,9 +82,10 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
-    - family: Cairo
+    - family: SpaceMono
       fonts:
-        - asset: fonts/Cairo-SemiBold.ttf
+        - asset: fonts/SpaceMono-Regular.ttf
+        
   #      - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro
