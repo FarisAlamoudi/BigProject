@@ -4,7 +4,6 @@ import 'package:reserve_smart/dbHelper/mongodb.dart';
 import 'package:intl/intl.dart';
 import 'date_selector.dart';
 
-
 class ReservePage extends StatefulWidget {
   final String user;
   const ReservePage({super.key, required this.user});
@@ -38,34 +37,33 @@ class _ReservePageState extends State<ReservePage> {
   }
 
   Future<List<Map<String, dynamic>>> fetchReservations(DateTime date) async {
-  var reserveCollection = MongoDatabase.reserveCollection;
-  var userCollection = MongoDatabase.userCollection;
+    var reserveCollection = MongoDatabase.reserveCollection;
+    var userCollection = MongoDatabase.userCollection;
 
-  bool isEmail = widget.user.contains('@');
-  String username;
+    bool isEmail = widget.user.contains('@');
+    String username;
 
-  if (isEmail) {
-    var userDoc = await userCollection.findOne({'Email': widget.user});
-    if (userDoc != null) {
-      username = userDoc['UserName'];
+    if (isEmail) {
+      var userDoc = await userCollection.findOne({'Email': widget.user});
+      if (userDoc != null) {
+        username = userDoc['UserName'];
+      } else {
+        return [];
+      }
     } else {
-      return [];
+      username = widget.user;
     }
-  } else {
-    username = widget.user;
+
+    DateTime startOfDay = DateTime(date.year, date.month, date.day, 0, 0, 0);
+    DateTime endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
+
+    var reservations = await reserveCollection.find({
+      'User': username,
+      'Start': {'\$gte': startOfDay, '\$lt': endOfDay}
+    }).toList();
+
+    return reservations;
   }
-
-  DateTime startOfDay = DateTime(date.year, date.month, date.day, 0, 0, 0);
-  DateTime endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
-
-  var reservations = await reserveCollection.find({
-    'User': username,
-    'Start': {'\$gte': startOfDay, '\$lt': endOfDay}
-  }).toList();
-
-  return reservations;
-}
-
 
   Future<void> signOut() async {
     try {
@@ -103,23 +101,28 @@ class _ReservePageState extends State<ReservePage> {
   Widget build(BuildContext context) {
     List<Map<String, dynamic>> sortedReservations = List.from(reservations);
     sortedReservations.sort((a, b) {
-      DateTime startA = DateTime.tryParse(a['Start'].toString()) ?? DateTime.now();
-      DateTime startB = DateTime.tryParse(b['Start'].toString()) ?? DateTime.now();
+      DateTime startA =
+          DateTime.tryParse(a['Start'].toString()) ?? DateTime.now();
+      DateTime startB =
+          DateTime.tryParse(b['Start'].toString()) ?? DateTime.now();
       return startA.compareTo(startB);
     });
 
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(130.0), // Specify your desired height here
+        preferredSize:
+            const Size.fromHeight(130.0), // Specify your desired height here
         child: AppBar(
           backgroundColor: const Color.fromARGB(255, 31, 41, 55),
           flexibleSpace: const Center(
             child: Padding(
-              padding: EdgeInsets.only(top: 20.0), // Adjust this value as needed for vertical centering
+              padding: EdgeInsets.only(
+                  top:
+                      20.0), // Adjust this value as needed for vertical centering
               child: Text(
                 'Reservations',
                 style: TextStyle(
-                  fontSize: 50,
+                  fontSize: 43,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'SpaceMono',
                   color: Colors.white,
@@ -129,93 +132,99 @@ class _ReservePageState extends State<ReservePage> {
           ),
         ),
       ),
-      body: Column(
-        children: [
-          WeekDaysSelector(
-            onDateSelected: (date) {
-              setState(() {
-                selectedDate = date;
-                fetchReservationsForSelectedDate();
-              });
-            },
-            reservations: sortedReservations,
-          ),
-          Expanded(
-            child: FutureBuilder<List<Map<String, dynamic>>>(
-              future: reservationFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (snapshot.hasData) {
-                  if (snapshot.data!.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(top: 125.0),
-                            child: Image.asset(
-                              'assets/SleepingBrain.png',
-                              height: 275,
-                            ),
-                          ),
-                          const SizedBox(height: 0),
-                          const Text(
-                            'No reservations found.',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  } else {
-                    return ListView.builder(
-                      itemCount: snapshot.data!.length,
-                      itemBuilder: (context, index) {
-                        final reservation = snapshot.data![index];
-                        DateTime start = DateTime.parse(reservation['Start'].toString());
-                        DateTime end = DateTime.parse(reservation['End'].toString());
-
-                        String startTime = DateFormat('h:mm a').format(start);
-                        String endTime = DateFormat('h:mm a').format(end);
-
-                        return Card(
-                          margin: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: ListTile(
-                            title: Text.rich(
-                              TextSpan(
-                                text: '${reservation["Machine"] ?? "N/A"} Reservation\n',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                children: [
-                                  TextSpan(
-                                    text: 'From $startTime to $endTime',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.normal,
-                                    ),
-                                  ),
-                                ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            WeekDaysSelector(
+              onDateSelected: (date) {
+                setState(() {
+                  selectedDate = date;
+                  fetchReservationsForSelectedDate();
+                });
+              },
+              reservations: sortedReservations,
+            ),
+            Expanded(
+              child: FutureBuilder<List<Map<String, dynamic>>>(
+                future: reservationFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (snapshot.hasData) {
+                    if (snapshot.data!.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              //padding: const EdgeInsets.only(top: 20.0),
+                              height: 190,
+                              child: Image.asset(
+                                'assets/SleepingBrain.png',
+                                height: 275,
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    );
+                            const SizedBox(height: 0),
+                            const Text(
+                              'No reservations found.',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    } else {
+                      return ListView.builder(
+                        itemCount: snapshot.data!.length,
+                        itemBuilder: (context, index) {
+                          final reservation = snapshot.data![index];
+                          DateTime start =
+                              DateTime.parse(reservation['Start'].toString());
+                          DateTime end =
+                              DateTime.parse(reservation['End'].toString());
+
+                          String startTime = DateFormat('h:mm a').format(start);
+                          String endTime = DateFormat('h:mm a').format(end);
+
+                          return Card(
+                            margin: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: ListTile(
+                              title: Text.rich(
+                                TextSpan(
+                                  text:
+                                      '${reservation["Machine"] ?? "N/A"} Reservation\n',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  children: [
+                                    TextSpan(
+                                      text: 'From $startTime to $endTime',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.normal,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    }
+                  } else {
+                    return const SizedBox.shrink();
                   }
-                } else {
-                  return const SizedBox.shrink();
-                }
-              },
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,

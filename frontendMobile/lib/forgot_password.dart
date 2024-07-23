@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:reserve_smart/main.dart';
 
-
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
 
@@ -15,7 +14,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final TextEditingController _emailController = TextEditingController();
 
   Future<void> sendPasswordResetEmail(BuildContext context) async {
-    const String forgotPasswordUrl = 'https://4331booking.com/api/auth/password/forgot';
+    const String forgotPasswordUrl =
+        'https://4331booking.com/api/auth/password/forgot';
 
     final String email = _emailController.text;
 
@@ -47,12 +47,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             content: Text('Password reset email sent successfully.'),
           ),
         );
-        _emailController.clear(); // Clear the text field after successful submission
+        _emailController
+            .clear(); // Clear the text field after successful submission
       } else {
         final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(jsonResponse['message'] ?? 'Unknown error'),
+            content: Text(jsonResponse['message'] ?? 'Invalid Email'),
           ),
         );
       }
@@ -60,7 +61,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       print(e.toString());
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Failed to connect to the server. Please try again later.'),
+          content:
+              Text('Failed to connect to the server. Please try again later.'),
         ),
       );
     }
@@ -70,19 +72,21 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          Container(
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-            child: Image.asset(
-              'assets/TheLogo.png',
-              height: 250,
-              width: 450,
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(16.0),
+          children: [
+            Container(
+              alignment: Alignment.center,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+              child: Image.asset(
+                'assets/TheLogo.png',
+                height: 200,
+                width: 450,
+              ),
             ),
-          ),
-          Expanded(
-            child: Padding(
+            Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -112,10 +116,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   TextField(
                     controller: _emailController,
                     decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 15.0, horizontal: 15),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(5.0),
-                        borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+                        borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
                       ),
                       labelText: 'Email',
                       labelStyle: const TextStyle(
@@ -159,7 +165,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       child: const Text(
                         'Already have an account? Log in!',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 14,
                           color: Color.fromARGB(255, 31, 41, 55),
                           fontWeight: FontWeight.bold,
                           fontFamily: 'SpaceMono',
@@ -170,8 +176,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

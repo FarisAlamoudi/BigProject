@@ -67,7 +67,7 @@ class _WeekDaysSelectorState extends State<WeekDaysSelector> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 25),
+          const SizedBox(height: 15),
           Padding(
             padding: const EdgeInsets.only(left: 16.0),
             child: Text(
@@ -78,9 +78,9 @@ class _WeekDaysSelectorState extends State<WeekDaysSelector> {
               ),
             ),
           ),
-          const SizedBox(height: 15),
+          const SizedBox(height: 10),
           Container(
-            height: 100,
+            height: 110,
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: [
@@ -109,7 +109,7 @@ class _WeekDaysSelectorState extends State<WeekDaysSelector> {
                           ),
                           const SizedBox(height: 8),
                           Container(
-                            width: 40,
+                            width: 37,
                             height: 40,
                             decoration: BoxDecoration(
                               color: selectedDate ==
@@ -146,7 +146,7 @@ class _WeekDaysSelectorState extends State<WeekDaysSelector> {
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(

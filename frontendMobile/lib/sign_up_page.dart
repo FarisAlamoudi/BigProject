@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:reserve_smart/main.dart'; 
+import 'package:reserve_smart/main.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -16,7 +16,8 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _passwordVerificationController = TextEditingController();
+  final TextEditingController _passwordVerificationController =
+      TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -80,7 +81,8 @@ class _SignUpPageState extends State<SignUpPage> {
       print(e.toString());
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Failed to connect to the server. Please try again later.'),
+          content:
+              Text('Failed to connect to the server. Please try again later.'),
           backgroundColor: Colors.red,
         ),
       );
@@ -91,47 +93,50 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          Container(
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-            child: Image.asset(
-              'assets/TheLogo.png',
-              height: 250,
-              width: 450,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Container(
+              alignment: Alignment.center,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+              child: Image.asset(
+                'assets/TheLogo.png',
+                height: 100,
+                width: 450,
+              ),
             ),
-          ),
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Center(
-                    child: Text(
-                      'Create Your Account',
-                      style: TextStyle(
-                        fontSize: 42,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'SpaceMono',
-                        color: Color.fromARGB(255, 31, 41, 55),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(16.0),
+                child: ListView(
+                  children: [
+                    const Center(
+                      child: Text(
+                        'Create Your Account',
+                        style: TextStyle(
+                          fontSize: 27,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'SpaceMono',
+                          color: Color.fromARGB(255, 31, 41, 55),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 15),
-                  Expanded(
-                    child: Form(
+                    const SizedBox(height: 15),
+                    Form(
                       key: _formKey,
-                      child: ListView(
+                      child: Column(
                         children: [
                           TextFormField(
                             controller: _firstNameController,
                             decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 15.0, horizontal: 15),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5.0),
-                                borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+                                borderSide: const BorderSide(
+                                    color: Color.fromARGB(255, 31, 41, 55),
+                                    width: 2.0),
                               ),
                               labelText: 'First Name',
                             ),
@@ -141,16 +146,20 @@ class _SignUpPageState extends State<SignUpPage> {
                               }
                               return null;
                             },
-                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
                           ),
                           const SizedBox(height: 20),
                           TextFormField(
                             controller: _lastNameController,
                             decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 15.0, horizontal: 15),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5.0),
-                                borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+                                borderSide: const BorderSide(
+                                    color: Color.fromARGB(255, 31, 41, 55),
+                                    width: 2.0),
                               ),
                               labelText: 'Last Name',
                             ),
@@ -160,16 +169,20 @@ class _SignUpPageState extends State<SignUpPage> {
                               }
                               return null;
                             },
-                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
                           ),
                           const SizedBox(height: 20),
                           TextFormField(
                             controller: _usernameController,
                             decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 15.0, horizontal: 15),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5.0),
-                                borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+                                borderSide: const BorderSide(
+                                    color: Color.fromARGB(255, 31, 41, 55),
+                                    width: 2.0),
                               ),
                               labelText: 'Username',
                               helperText: 'Must be 5 characters long',
@@ -183,16 +196,20 @@ class _SignUpPageState extends State<SignUpPage> {
                               }
                               return null;
                             },
-                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
                           ),
                           const SizedBox(height: 20),
                           TextFormField(
                             controller: _emailController,
                             decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 15.0, horizontal: 15),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5.0),
-                                borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+                                borderSide: const BorderSide(
+                                    color: Color.fromARGB(255, 31, 41, 55),
+                                    width: 2.0),
                               ),
                               labelText: 'Email',
                             ),
@@ -202,19 +219,24 @@ class _SignUpPageState extends State<SignUpPage> {
                               }
                               return null;
                             },
-                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
                           ),
                           const SizedBox(height: 20),
                           TextFormField(
                             controller: _passwordController,
                             decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 15.0, horizontal: 15),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5.0),
-                                borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+                                borderSide: const BorderSide(
+                                    color: Color.fromARGB(255, 31, 41, 55),
+                                    width: 2.0),
                               ),
                               labelText: 'Password',
-                              helperText: 'Must be 8 characters long and contain a number',
+                              helperText:
+                                  'Must be 8 characters long and contain a number',
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -229,16 +251,20 @@ class _SignUpPageState extends State<SignUpPage> {
                               return null;
                             },
                             obscureText: true,
-                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
                           ),
                           const SizedBox(height: 20),
                           TextFormField(
                             controller: _passwordVerificationController,
                             decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 15.0, horizontal: 15),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5.0),
-                                borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+                                borderSide: const BorderSide(
+                                    color: Color.fromARGB(255, 31, 41, 55),
+                                    width: 2.0),
                               ),
                               labelText: 'Verify Password',
                             ),
@@ -252,7 +278,8 @@ class _SignUpPageState extends State<SignUpPage> {
                               return null;
                             },
                             obscureText: true,
-                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
                           ),
                           const SizedBox(height: 30),
                           ElevatedButton(
@@ -262,8 +289,10 @@ class _SignUpPageState extends State<SignUpPage> {
                               }
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color.fromARGB(255, 31, 41, 55),
-                              padding: const EdgeInsets.symmetric(vertical: 15.0),
+                              backgroundColor:
+                                  const Color.fromARGB(255, 31, 41, 55),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 100.0),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(5.0),
                               ),
@@ -284,16 +313,18 @@ class _SignUpPageState extends State<SignUpPage> {
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => const LoginPage()),
+                                MaterialPageRoute(
+                                    builder: (context) => const LoginPage()),
                               );
                             },
                             style: TextButton.styleFrom(
-                              foregroundColor: const Color.fromARGB(255, 31, 41, 55),
+                              foregroundColor:
+                                  const Color.fromARGB(255, 31, 41, 55),
                             ),
                             child: const Text(
                               'Already have an account? Login!',
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: 15,
                                 color: Color.fromARGB(255, 31, 41, 55),
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'SpaceMono',
@@ -303,12 +334,12 @@ class _SignUpPageState extends State<SignUpPage> {
                         ],
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

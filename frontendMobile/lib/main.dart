@@ -8,10 +8,9 @@ import 'package:reserve_smart/sign_up_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await MongoDatabase.connect(); 
+  await MongoDatabase.connect();
   runApp(const MyApp());
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -32,7 +31,8 @@ class MyApp extends StatelessWidget {
           labelStyle: const TextStyle(color: Color.fromARGB(255, 31, 41, 55)),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(200.0),
-            borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+            borderSide: const BorderSide(
+                color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
           ),
         ),
       ),
@@ -103,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
         final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(jsonResponse['message'] ?? 'Unknown error'),
+            content: Text(jsonResponse['message'] ?? 'Invalid Login'),
             backgroundColor: Colors.red,
           ),
         );
@@ -112,7 +112,8 @@ class _LoginPageState extends State<LoginPage> {
       print(e.toString());
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Failed to connect to the server. Please try again later.'),
+          content:
+              Text('Failed to connect to the server. Please try again later.'),
           backgroundColor: Colors.red,
         ),
       );
@@ -120,22 +121,25 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   @override
-    Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Set the background color of the Scaffold to white
-      body: Column(
-        children: [
-          Container(
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-            child: Image.asset(
-              'assets/TheLogo.png',
-              height: 250,
-              width: 450,
+      backgroundColor:
+          Colors.white, // Set the background color of the Scaffold to white
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(16.0),
+          children: [
+            Container(
+              alignment: Alignment.center,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+              child: Image.asset(
+                'assets/TheLogo.png',
+                height: 180,
+                width: 450,
+              ),
             ),
-          ),
-          Expanded(
-            child: Container(
+            Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -144,23 +148,26 @@ class _LoginPageState extends State<LoginPage> {
                     child: Text(
                       'Welcome Back!',
                       style: TextStyle(
-                        fontSize: 42,
+                        fontSize: 36,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'SpaceMono',
                         color: Color.fromARGB(255, 31, 41, 55),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 55),
+                  const SizedBox(height: 45),
                   SizedBox(
                     height: 60,
                     child: TextField(
                       controller: _emailController,
                       decoration: InputDecoration(
-                        contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 15.0, horizontal: 15),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5.0),
-                          borderSide: const BorderSide(color: Color.fromARGB(255, 31, 41, 55), width: 2.0),
+                          borderSide: const BorderSide(
+                              color: Color.fromARGB(255, 31, 41, 55),
+                              width: 2.0),
                         ),
                         labelText: 'Username',
                       ),
@@ -172,7 +179,8 @@ class _LoginPageState extends State<LoginPage> {
                     child: TextField(
                       controller: _passwordController,
                       decoration: InputDecoration(
-                        contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15),
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 15.0, horizontal: 15),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5.0),
                         ),
@@ -197,10 +205,10 @@ class _LoginPageState extends State<LoginPage> {
                       child: const Text(
                         'Login',
                         style: TextStyle(
-                          fontSize: 20, 
+                          fontSize: 20,
                           color: Colors.white,
                           fontFamily: 'SpaceMono',
-                        ),   
+                        ),
                       ),
                     ),
                   ),
@@ -209,7 +217,8 @@ class _LoginPageState extends State<LoginPage> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const SignUpPage()),
+                        MaterialPageRoute(
+                            builder: (context) => const SignUpPage()),
                       );
                     },
                     style: TextButton.styleFrom(
@@ -218,18 +227,19 @@ class _LoginPageState extends State<LoginPage> {
                     child: const Text(
                       "Don't have an account? Register",
                       style: TextStyle(
-                          fontSize: 16,
-                          color: Color.fromARGB(255, 31, 41, 55),
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'SpaceMono',
-                        ),
+                        fontSize: 14,
+                        color: Color.fromARGB(255, 31, 41, 55),
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'SpaceMono',
+                      ),
                     ),
                   ),
                   TextButton(
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),
+                        MaterialPageRoute(
+                            builder: (context) => const ForgotPasswordPage()),
                       );
                     },
                     style: TextButton.styleFrom(
@@ -238,18 +248,19 @@ class _LoginPageState extends State<LoginPage> {
                     child: const Text(
                       "Forget your password? Click here",
                       style: TextStyle(
-                          fontSize: 16,
-                          color: Color.fromARGB(255, 31, 41, 55),
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'SpaceMono',
-                        ),
+                        fontSize: 13,
+                        color: Color.fromARGB(255, 31, 41, 55),
+                        //color: Color.fromARGB(255, 11, 87, 208),
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'SpaceMono',
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
