@@ -1,6 +1,6 @@
 # BigProject
 
-#Faris Alamoudi - Database/Project Manager
+#Faris Alamoudi - Database/Project Manager \n
 #Keating Sane - API/Front End
 #Israel Charles - API/Front End
 #Jeremy Hagler - Mobile App
