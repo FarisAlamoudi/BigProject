@@ -41,8 +41,12 @@ void main() {
     await tester.pumpWidget(const MyApp());
 
     // Find the 'Forgot my password' button and tap on it.
-    var forgotPasswordButton = find.text("Forget your password?");
+    var forgotPasswordButton = find.text("Forget your password? Click here");
     expect(forgotPasswordButton, findsOneWidget);
+
+    // Scroll the ListView to bring the button into view.
+    await tester.drag(find.byType(ListView), const Offset(0, -300));
+    await tester.pumpAndSettle();
 
     // Ensure the button is visible.
     await tester.ensureVisible(forgotPasswordButton);
@@ -53,15 +57,20 @@ void main() {
     //await Future.delayed(const Duration(seconds: 2));
 
     // Verify that the 'Forgot Password' page is shown.
-    expect(find.byKey(const Key('forgotPasswordPage')), findsOneWidget);
+    expect(find.text('Forgot Your Password?'), findsOneWidget);
 
     // Go back to the login page.
-    await tester.pageBack();
+    //await tester.pageBack();
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
     await tester.pumpAndSettle();
 
     // Find the 'Don't have an account? Sign Up!' button and tap on it.
-    var signUpButton = find.text("Don't have an account? Sign Up!");
+    var signUpButton = find.text("Don't have an account? Register");
     expect(signUpButton, findsOneWidget);
+
+    // Scroll the ListView to bring the button into view.
+    await tester.drag(find.byType(ListView), const Offset(0, -300));
+    await tester.pumpAndSettle();
 
     // Ensure the button is visible.
     await tester.ensureVisible(signUpButton);
@@ -101,5 +110,7 @@ void main() {
     expect(find.text('Reservations'), findsOneWidget);
     //expect(find.text('Invalid Credentials'), findsOneWidget);
   */
+
+    print('Success! (Forget Password, Register, Login)');
   });
 }
