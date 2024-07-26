@@ -157,26 +157,52 @@ class _WeekDaysSelectorState extends State<WeekDaysSelector> {
                   Column(
                     children: widget.reservations.map((reservation) {
                       DateTime start =
-                          DateTime.parse(reservation["Start"].toString());
+                          DateTime.parse(reservation["start"].toString());
                       DateTime end =
-                          DateTime.parse(reservation["End"].toString());
+                          DateTime.parse(reservation["end"].toString());
 
                       String startTime = DateFormat('h:mm a').format(start);
                       String endTime = DateFormat('h:mm a').format(end);
 
                       return Card(
                         margin: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: ListTile(
-                          title: Text(
-                              'Machine ${reservation["Machine"] ?? "N/A"}'),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text('$startTime - $endTime'),
-                              const SizedBox(height: 5),
-                              Text(
-                                  'Comment: ${reservation["Comment"] ?? "No comment"}'),
-                            ],
+                        child: SingleChildScrollView(
+                          child: ListTile(
+                            title: RichText(
+                              text: TextSpan(
+                                style: DefaultTextStyle.of(context).style,
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text:
+                                        'Reservation: ${reservation["resourceName"] ?? "N/A"}',
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20.0),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  '$startTime - $endTime',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.normal,
+                                      fontSize: 16.0),
+                                ),
+                                Text(
+                                  'Location: ${reservation["resourceLocation"] ?? "N/A"}',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.normal,
+                                      fontSize: 16.0),
+                                ),
+                                const SizedBox(height: 10),
+                                //Text('Size: ${reservation["size"] ?? "N/A"}'),
+                                Text(
+                                    'Comment: ${reservation["comment"] ?? "None"}'),
+                              ],
+                            ),
                           ),
                         ),
                       );

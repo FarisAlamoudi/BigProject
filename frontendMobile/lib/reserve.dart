@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:reserve_smart/dbHelper/mongodb.dart';
 import 'package:intl/intl.dart';
 import 'date_selector.dart';
+import 'package:mongo_dart/mongo_dart.dart' as mongo;
 
 class ReservePage extends StatefulWidget {
   final String user;
@@ -39,28 +40,51 @@ class _ReservePageState extends State<ReservePage> {
   Future<List<Map<String, dynamic>>> fetchReservations(DateTime date) async {
     var reserveCollection = MongoDatabase.reserveCollection;
     var userCollection = MongoDatabase.userCollection;
+    var resourceCollection = MongoDatabase.resourceCollection;
 
     bool isEmail = widget.user.contains('@');
-    String username;
+    String userId;
 
+    //Use login info to get that users id. (from ObjectId get the UserId string within)
+    //If Email was used to sign in
     if (isEmail) {
       var userDoc = await userCollection.findOne({'Email': widget.user});
       if (userDoc != null) {
-        username = userDoc['UserName'];
+        userId = userDoc['_id'].toHexString();
       } else {
         return [];
       }
     } else {
-      username = widget.user;
+      //If Username was used to sign in
+      var userDoc = await userCollection.findOne({'userName': widget.user});
+      if (userDoc != null) {
+        userId = userDoc['_id'].toHexString();
+      } else {
+        return [];
+      }
     }
+    print(userId);
 
     DateTime startOfDay = DateTime(date.year, date.month, date.day, 0, 0, 0);
     DateTime endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
 
+    //User userId to get that users Reservation info
     var reservations = await reserveCollection.find({
-      'User': username,
-      'Start': {'\$gte': startOfDay, '\$lt': endOfDay}
+      'userId': userId,
+      'start': {'\$gte': startOfDay, '\$lt': endOfDay}
     }).toList();
+
+    //Fetch resources and add them to reservations
+    for (var reservation in reservations) {
+      var resourceId = mongo.ObjectId.parse(reservation['resourceId']);
+      var resourceDoc = await resourceCollection.findOne({'_id': resourceId});
+      print(resourceDoc);
+      if (resourceDoc != null) {
+        reservation['resourceName'] = resourceDoc['name'];
+        reservation['resourceLocation'] = resourceDoc['location'];
+      }
+    }
+    print('Reservations: $reservations');
 
     return reservations;
   }
@@ -78,7 +102,7 @@ class _ReservePageState extends State<ReservePage> {
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Successfully logged out'),
+            content: Text('Successfully Logged Out'),
             backgroundColor: Colors.green,
           ),
         );
@@ -180,42 +204,7 @@ class _ReservePageState extends State<ReservePage> {
                         ),
                       );
                     } else {
-                      return ListView.builder(
-                        itemCount: snapshot.data!.length,
-                        itemBuilder: (context, index) {
-                          final reservation = snapshot.data![index];
-                          DateTime start =
-                              DateTime.parse(reservation['Start'].toString());
-                          DateTime end =
-                              DateTime.parse(reservation['End'].toString());
-
-                          String startTime = DateFormat('h:mm a').format(start);
-                          String endTime = DateFormat('h:mm a').format(end);
-
-                          return Card(
-                            margin: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: ListTile(
-                              title: Text.rich(
-                                TextSpan(
-                                  text:
-                                      '${reservation["Machine"] ?? "N/A"} Reservation\n',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  children: [
-                                    TextSpan(
-                                      text: 'From $startTime to $endTime',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.normal,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      );
+                      return const SizedBox.shrink();
                     }
                   } else {
                     return const SizedBox.shrink();
