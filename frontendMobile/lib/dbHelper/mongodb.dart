@@ -5,7 +5,7 @@ import 'package:mongo_dart/mongo_dart.dart';
 import 'package:reserve_smart/mongo_users.dart';
 
 class MongoDatabase {
-  static var db, userCollection, reserveCollection;
+  static var db, userCollection, reserveCollection, resourceCollection;
   //Connect to DB and any collections here to be able to use throughout App
   static connect() async {
     db = await Db.create(MONGO_CONN_URL);
@@ -13,8 +13,9 @@ class MongoDatabase {
     inspect(db); //for showing DB connection status & info in debug console
     userCollection =
         db.collection(USER_COLLECTION); //Connect to Users Collection
-    reserveCollection =
-        db.collection(RESERVE_COLLECTION); //Connect to Reservations Collection
+    reserveCollection = db.collection(RESERVE_COLLECTION);
+    resourceCollection =
+        db.collection(RESOURCE_COLLECTION); //Connect to Reservations Collection
   }
 
   static Future<String> insert(MongoUsers data) async {
