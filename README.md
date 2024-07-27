@@ -1,18 +1,30 @@
-# 4331booking.com
+# 4331Booking
 
-"Welcome to 4331booking.com, your one-stop solution for seamless event and location reservations, offering tailored services for corporate events, private parties, and more, with an easy-to-use booking system and dedicated customer support."
+This project is a versatile scheduling software designed to streamline the reservation process for resources. The software aims to enhance resource management by providing an intuitive interface for users to book, view, and manage reservations efficiently.
 
-#Faris Alamoudi - Database/Project Manager
+### Web App Link: https://4331booking.com/
 
-#Keating Sane - API/Front End
+## Features
 
-#Israel Charles - API/Front End
+### Account Management:
 
-#Jeremy Hagler - Mobile App
+-   Users can sign up with an email
+-   Email confirmation to complete the signup process
+-   Password reset functionality
+-   Profile information modification
 
-#Mahica Devireddy - Mobile App
+### Home Page:
 
-#Eswanth Chegalasetty - Front end
+-   Displays a search page for resources where users can filter their search
 
-#Milan Mathew - Front End
+### My-Reservations Page:
 
+-   Displays all of the users past and present reservations with the ability to cancel those upcoming
+
+### My-Resources Page:
+
+-   Displays all of the users resources where they are able to fully manage them
+
+## Reservation Page (WIP):
+
+-   Displays the details of a resource, including a weekly/daily view of the current reservations status and allows the user to make new reservations
